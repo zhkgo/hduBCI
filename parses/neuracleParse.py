@@ -8,12 +8,14 @@ import socket
 import matplotlib.pyplot as plt
 import threading
 import numpy as np
+import time
+from scipy.signal import resample
 class TCPParser:  # The script contains one main class which handles Streamer data packet parsing.
 
     def __init__(self, host, port):
         self.host = host
         self.port = port
-        # self.data_log = b''
+        self.data_log = b''
         self.done =False
         # print(testnum)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -28,21 +30,35 @@ class TCPParser:  # The script contains one main class which handles Streamer da
         self.crate_batch(self.ch_names,self.sampleRate)
     def close(self):
         self.sock.close()
+    def saveData(self):
+        ctime=time.strftime("%Y%m%d%H%M%S",time.localtime())
+        savepathlog="data/log"+ctime+".npy"
+        savepathvalue="data/value"+ctime+".npy"
+        np.save(savepathlog,self.data_log)
+        np.save(savepathvalue,self.signals[:self.end])
         
     def crate_batch(self, ch_names, sampleRate=1000):
         self.ch_names = ch_names
         self.sampleRate = sampleRate
         self.signals = np.zeros((len(ch_names), 3600000))
         self.buffer = b''
-    def get_batch(self,times=2000):
+    def get_batch(self,startPos,maxlength=1000):
         # with open("buffer.txt","w") as f:
         #     f.write(str(self.signals[:,-1000:]))
         # print("innerBatch",id(self.end))
-        print("================= SELF-END:",self.end)
-        print("----------------------")
-        print(str(self.signals[:,self.end-times:self.end]))
-        print("----------------------")
-        return self.signals[:,self.end-times:self.end]
+        print(type(startPos),startPos)
+        startPos=int(startPos)
+        if startPos<=-1:
+            startPos=self.end-maxlength
+        rend=min(self.end,startPos+maxlength)
+        secs=(rend-startPos)/self.sampleRate
+        samps=int(secs*100)
+        arr=None
+        if samps!=0:
+            arr=resample(self.signals[:,startPos:rend],samps,axis=1)
+        else:
+            arr=self.signals[:,startPos:rend]
+        return arr,rend
     def bufferToSignal(self, size):
         batchbuffer = []
         tot = size * len(self.ch_names)
@@ -50,24 +66,20 @@ class TCPParser:  # The script contains one main class which handles Streamer da
             batchbuffer.append(self.buffer[4 * i:4 * i + 4])
         batchbuffer = np.array(batchbuffer).reshape(len(self.ch_names), size)
         batchbuffer.dtype = np.float32
-        # 存在可以优化的空间 通过预分配大容量signals
+        # 存在可以优化的空间 通过预分配大容量signals 已优化
         # self.signals = np.hstack([self.signals, batchbuffer])
-        print(batchbuffer)
         self.signals[:,self.end:self.end+size]=batchbuffer
         self.end=self.end+size                
         # 更新buffer
-        print(id(self.end))
         print("-----Signals已更新-------END:",self.end)
-        print(str(self.signals[:,:self.end]))
-        print("----------------------")
-        self.buffer = self.buffer[4 * tot:]
+        self.buffer = self.buffer[ 4* tot:]
 
-        return 4 * tot
+        return 8 * tot
 
     def parse_data(self):
         while not self.done:
             data = self.sock.recv(921600)
-            # self.data_log += data
+            self.data_log += data
             self.buffer += data
             # 4表示四个字节 一个单精度
             # 0.02表示拿到0.02秒的数据就更新signals
@@ -105,3 +117,6 @@ class TCPParser:  # The script contains one main class which handles Streamer da
 
         self.done = True
         data_thread.join()
+#tcp = TCPParser('localhost', 8712)
+#tcp.crate_batch(['Fz' for i in range(32)])
+#tcp.parse_data()

@@ -6,7 +6,7 @@ Created on Fri Nov  6 15:40:45 2020
 """
 
 import threading
-from flask import Flask
+from flask import Flask,request
 from flask import render_template
 import json
 from parses.neuracleParse import TCPParser
@@ -34,14 +34,19 @@ def start():
     # tcp.reinit()
     return  "ok"
 
+@app.route("/saveData")
+def savedata():
+    global tcp
+    tcp.saveData()
+    return "ok"
 
 @app.route('/getdata')
 def getdata():
     global tcp
     print("TCP END WHEN GET DATA",tcp.end)
-    arr=tcp.get_batch(times=500)
+    arr,timeend=tcp.get_batch(request.args.get('timeend'))
     # ['Fz','Cz','Pz','P3','P4','P7','P8','Oz','O1','O2','T7','T8']
-    jsonarr=json.dumps({"data":arr.tolist(),'ch_names':tcp.ch_names})
+    jsonarr=json.dumps({"data":arr.tolist(),'ch_names':tcp.ch_names,'timeend':timeend})
     return jsonarr
     
 if __name__ == '__main__':
