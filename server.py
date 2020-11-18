@@ -12,19 +12,22 @@ import json
 from parses.neuracleParse import TCPParser
 app = Flask(__name__)
 
-@app.route('/')
-def index():
+@app.route('/datashow')
+def dataShow():
     return  render_template("dataShow.html")
 
-@app.route('/stop')
+@app.route('/')
+def index():
+    return render_template("index.html")
+
+@app.route('/api/stop')
 def stop():
     global tcp,data_thread
     tcp.close()
     data_thread.join()
     return  "ok"
 
-
-@app.route('/start')
+@app.route('/api/start')
 def start():
     global tcp,data_thread
     tcp = TCPParser('localhost', 8712)
@@ -34,13 +37,13 @@ def start():
     # tcp.reinit()
     return  "ok"
 
-@app.route("/saveData")
+@app.route("/api/saveData")
 def savedata():
     global tcp
     tcp.saveData()
     return "ok"
 
-@app.route('/getdata')
+@app.route('/api/getdata')
 def getdata():
     global tcp
     print("TCP END WHEN GET DATA",tcp.end)

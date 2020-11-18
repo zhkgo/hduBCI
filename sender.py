@@ -23,6 +23,7 @@ data=np.ascontiguousarray(data)
 mbytes=BytesIO()
 mbytes.write(data)
 # printMem(a)
+# data=np.load("data/log20201117172718.npy")
 import socket
 import os
 #声明类型，生成socket链接对象
