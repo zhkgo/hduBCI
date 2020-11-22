@@ -12,14 +12,15 @@ class BciFilter:
         self.high=high
         self.sampleRate=sampleRate
         self.sampleRateTo=sampleRateTo
-    def deal(self,data):
-        #先滤波后降采样
+        
+        # 8表示8阶
         nyq=self.sampleRate/2
         low=self.low/nyq
         high=self.high/nyq
-        # 8表示8阶
-        b,a=signal.buffer(8,[low,high],'bandpass')
-        data=signal.filtfilt(b,a,data)
+        self.b,self.a=signal.buffer(8,[low,high],'bandpass')
+    def deal(self,data):
+        #先滤波后降采样
+        data=signal.filtfilt(self.b,self.a,data)
         secs=data.shape[1]/self.sampleRate
         samps=int(secs*self.sampleRateTo)
         data=resample(data,samps,axis=1)

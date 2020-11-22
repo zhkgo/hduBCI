@@ -63,8 +63,26 @@ def createFilter():
     return "ok"
 @app.route("api/createScaler")
 def createScaler():
-    pass
-    return "wait for do"
+    if experiment==None:
+        return "请先创建实验"
+    code_scaler=request.args.get("code")
+    scope={}
+    exec(code_scaler,scope)
+    scaler=scope['scaler']
+    experiment.set_scaler(scaler)
+    return "ok"
+
+@app.route("api/createClassfier")
+def createClassfier():
+    if experiment==None:
+        return "请先创建实验"
+    code_clf=request.args.get("code")
+    scope={}
+    exec(code_clf,scope)
+    clf=scope['clf']
+    experiment.set_classfier(clf)
+    return "ok"
+
 @app.route("/api/saveData")
 def savedata():
     global tcp
