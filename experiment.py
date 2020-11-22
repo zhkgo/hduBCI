@@ -5,14 +5,14 @@ Created on Sat Nov 21 20:41:30 2020
 @author: zhkgo
 """
 import numpy as np
-class Experience:
+class Experiment:
     def __init__(self):
         self.tcp=None
         self.classfier=None
         self.scaler=None
         self.filter=None
         self.channels=None
-        self.res=np.zeros((3600))
+        self.res=np.zeros((3600,1))
         # self.end=0
     def set_dataIn(self,tcp):
         self.tcp=tcp
@@ -35,8 +35,8 @@ class Experience:
         data=self.tcp.getCur()
         if self.filter:
             data=self.filter.deal(data)
+        data=data.reshape(1,data.shape[0],data.shape[1])
         if self.scaler:
             data=self.scaler.transform(data)
         self.res[0]=self.classfier.predict(data)
-        np.roll(self.res,1)
-    
+        np.roll(self.res,1,axis=0)

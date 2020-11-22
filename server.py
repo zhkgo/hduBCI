@@ -9,6 +9,8 @@ import threading
 from flask import Flask,request
 from flask import render_template
 import json
+from bcifilter import BciFilter
+from experiment import Experiment
 from parses.neuracleParse import TCPParser
 app = Flask(__name__)
 
@@ -24,6 +26,7 @@ def index():
 def stop():
     global tcp,data_thread
     tcp.close()
+    tcp=None
     data_thread.join()
     return  "ok"
 
@@ -36,7 +39,32 @@ def start():
     data_thread.start()
     # tcp.reinit()
     return  "ok"
-
+@app.route("/api/createExperiment")
+def createExperiment():
+    global experiment
+    if experiment!=None:
+        return "实验已存在，无需创建，或者请先删除"
+    experiment=Experiment()
+@app.route("/api/createFilter")
+def createFilter():
+    if experiment==None:
+        return "请先创建实验"
+    low=1
+    high=40
+    sampleRateTo=1000
+    try:
+        low=float(request.args.get('low'))
+        high=float(request.args.get('high'))
+        sampleRateTo=int(request.args.get('sampleRate'))
+    except:
+        return "error In get Parameters"
+    mfilter=BciFilter(low,high,tcp.sampleRate,sampleRateTo)
+    experiment.set_filter(mfilter)
+    return "ok"
+@app.route("api/createScaler")
+def createScaler():
+    pass
+    return "wait for do"
 @app.route("/api/saveData")
 def savedata():
     global tcp
@@ -55,5 +83,6 @@ def getdata():
 if __name__ == '__main__':
     app.debug = True # 设置调试模式，生产模式的时候要关掉debug
     tcp = None
+    experiment = None
     app.run(port=10086) 
 

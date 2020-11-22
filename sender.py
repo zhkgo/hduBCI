@@ -46,7 +46,6 @@ try:
             t+=20
             if t>=18000:
                 t=0
-            
         # server.close()
 except Exception as e:
     print("----------------")
