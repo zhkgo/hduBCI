@@ -29,6 +29,9 @@ class TCPParser:  # The script contains one main class which handles Streamer da
         self.sock.connect((self.host, self.port))
         self.crate_batch(self.ch_names,self.sampleRate)
     def close(self):
+        self.done=True
+        #先停200ms确保当前正在接受的数据解析完毕
+        time.sleep(0.2)
         self.sock.close()
     def saveData(self):
         ctime=time.strftime("%Y%m%d%H%M%S",time.localtime())

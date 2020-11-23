@@ -5,7 +5,11 @@
  </head> 
  <body style="height: 100%; margin: 0"> 
   <div> 
-   <input type="button" value="接受数据" onclick="startReceive()" /> 
+   <input type="button" value="创建实验" onclick="crateExperiment()" /> 
+   <input type="button" value="创建连接" onclick="crateConnect()" /> 
+   <input type="button" value="开始解析数据" onclick="startParse()" /> 
+   <input type="button" value="关闭TCP链接" onclick="stopParse()" />
+   <input type="button" value="开始接受数据" onclick="startReceive()" /> 
    <input type="button" value="停止接受数据" onclick="stopReceive()" />
    <input type="button" value="同步数据" onclick="sysn()" /> 
    <label for="scale">幅值</label>
@@ -41,6 +45,42 @@ var indata = Array.from({length:ch_nums},x=>Array.from({length:totTime}, y=>0));
 var newdata = [];
 var scale=10000;
 var timeend=-1;
+function crateExperiment(){
+	$.ajax({
+        url: baseurl+"createExperiment",
+        //请求地址
+        type: "get",
+        //请求方式
+        success: function(data) { //回调函数：数据请求成功之后调用
+            //console.log(data)
+			console.log(data)
+        }
+    })
+}
+function createFilter(){
+	$.ajax({
+        url: baseurl+"createFilter",
+        //请求地址
+        type: "get",
+        //请求方式
+        success: function(data) { //回调函数：数据请求成功之后调用
+            //console.log(data)
+			console.log(data)
+        }
+    })
+}
+function crateConnect(){
+	    $.ajax({
+        url: baseurl+"createTcp",
+        //请求地址
+        type: "get",
+        //请求方式
+        success: function(data) { //回调函数：数据请求成功之后调用
+            //console.log(data)
+			console.log(data)
+        }
+    })
+}
 function updateScale(){
 	scale = Number($("#scale").val());
 }
@@ -156,9 +196,15 @@ function getdata() {
     })
 }
 var loopId=0;
-function startReceive() {
+function startReceive(){
+	loopId = setInterval(getdata,200);
+}
+function stopReceive(){
+	clearInterval(loopId);
+}
+function startParse() {
     $.ajax({
-        url: baseurl+"start",
+        url: baseurl+"startTcp",
         //请求地址
         type: "get",
         //请求方式
@@ -170,10 +216,10 @@ function startReceive() {
         }
     })
 }
-function stopReceive() {
+function stopParse() {
 	clearInterval(loopId);
     $.ajax({
-        url: baseurl+"stop",
+        url: baseurl+"stopTcp",
         //请求地址
         type: "get",
         //请求方式

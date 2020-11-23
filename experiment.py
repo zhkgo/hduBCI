@@ -4,6 +4,7 @@ Created on Sat Nov 21 20:41:30 2020
 
 @author: zhkgo
 """
+import threading
 import numpy as np
 class Experiment:
     def __init__(self):
@@ -13,7 +14,25 @@ class Experiment:
         self.filter=None
         self.channels=None
         self.res=np.zeros((3600,1))
+        self.done=False
+        self.tcpThread = None
         # self.end=0
+    def finish(self):
+        self.done=True
+        self.stop_tcp()
+    def start_tcp(self):
+        assert self.tcp !=None,"请先初始化设置" 
+        self.tcpThread = threading.Thread(target=self.tcp.parse_data)
+        self.tcpThread.start()
+    def stop_tcp(self):
+        self.tcp.close()
+        self.tcp.saveData()
+        self.tcpTread.join()
+        print("TCP线程已成功关闭")
+    def restart_tcp(self):
+        self.stop_tcp()
+        self.tcp.reinit()
+        self.start_tcp( )
     def set_dataIn(self,tcp):
         self.tcp=tcp
     def set_filter(self,sfilter):
@@ -32,11 +51,23 @@ class Experiment:
     def start(self):
         assert self.tcp !=None ,"接入数据不能为空"
         assert self.classfier !=None, "分类器不能为空"
+        while not self.done:
+            data=self.tcp.getCur()
+            if self.filter:
+                data=self.filter.deal(data)
+            data=data.reshape(1,data.shape[0],data.shape[1])
+            if self.scaler:
+                data=self.scaler.transform(data)
+            self.res[0]=self.classfier.predict(data)
+            np.roll(self.res,1,axis=0)
+    def predictOnce(self):
+        assert self.tcp !=None ,"接入数据不能为空"
+        assert self.classfier !=None, "分类器不能为空"
         data=self.tcp.getCur()
         if self.filter:
             data=self.filter.deal(data)
         data=data.reshape(1,data.shape[0],data.shape[1])
         if self.scaler:
             data=self.scaler.transform(data)
-        self.res[0]=self.classfier.predict(data)
-        np.roll(self.res,1,axis=0)
+        label=self.classfier.predict(data)[0]
+        return label
