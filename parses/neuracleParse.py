@@ -51,12 +51,13 @@ class TCPParser:  # The script contains one main class which handles Streamer da
         # print("innerBatch",id(self.end))
         print(type(startPos),startPos)
         startPos=int(startPos)
-        if startPos<=-1:
+        if startPos<=-1 :
             startPos=self.end-maxlength
         rend=min(self.end,startPos+maxlength)
         secs=(rend-startPos)/self.sampleRate
         samps=int(secs*100)
         arr=None
+        print("startPos",startPos," rend",rend)
         if samps!=0:
             arr=resample(self.signals[:,startPos:rend],samps,axis=1)
         else:

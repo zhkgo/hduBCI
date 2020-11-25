@@ -5,6 +5,7 @@ Created on Sun Nov 22 10:23:11 2020
 @author: zhkgo
 """
 from scipy import signal
+from scipy.signal import butter
 from scipy.signal import resample
 class BciFilter:
     def __init__(self,low=1,high=40,sampleRate=1000,sampleRateTo=1000):
@@ -17,7 +18,7 @@ class BciFilter:
         nyq=self.sampleRate/2
         low=self.low/nyq
         high=self.high/nyq
-        self.b,self.a=signal.buffer(8,[low,high],'bandpass')
+        self.b,self.a=butter(8,[low,high],'bandpass')
     def deal(self,data):
         #先滤波后降采样
         data=signal.filtfilt(self.b,self.a,data)

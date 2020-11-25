@@ -6,6 +6,7 @@
  <body style="height: 100%; margin: 0"> 
   <div> 
    <input type="button" value="创建实验" onclick="crateExperiment()" /> 
+   <input type="button" value="创建滤波器(可输入参数)" onclick="createFilter()" /> 
    <input type="button" value="创建连接" onclick="crateConnect()" /> 
    <input type="button" value="开始解析数据" onclick="startParse()" /> 
    <input type="button" value="关闭TCP链接" onclick="stopParse()" />
@@ -14,6 +15,12 @@
    <input type="button" value="同步数据" onclick="sysn()" /> 
    <label for="scale">幅值</label>
         <select id="scale" onChange="updateScale()">
+            <option value=0.00005>0.00005</option>
+            <option value=0.0005>0.0005</option>
+            <option value=0.005>0.005</option>
+            <option value=0.05>0.05</option>
+            <option value=0.5>0.5</option>
+            <option value=5>5</option>
             <option value=50>50</option>
             <option value=500>500</option>
             <option value=1000>1000</option>
@@ -21,8 +28,22 @@
             <option value=10000>10000</option>
             <option value=50000>50000</option>
         </select>
+    <form action="http://localhost:10086/api/createScaler">
+		特征提取（标准化）器 对象名应该为scaler:<br>
+        <textarea name="code" cols="100" rows="100" warp="virtual"></textarea>
+				<br>
+	<input type="submit" value="提交代码">
+	</form> 
+	<form action="http://localhost:10086/api/createClassfier">
+        分类器 对象名应该为scaler:<br>
+        
+        <textarea name="code" cols="100" rows="100" warp="virtual"></textarea>
+				<br>
+	<input type="submit" value="提交代码">
+	</form> 
+	<input type="button" value="获取预测结果" onclick="predictOnce()" /> 
    <div id="container" style="height: 2000px"></div> 
-  
+	
   </div> 
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script> 
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts-gl/dist/echarts-gl.min.js"></script> 
@@ -40,10 +61,10 @@ var app = {};
 option = null;
 var sampleRate=100;
 var totTime=sampleRate*10;
-var ch_nums=32;
+var ch_nums=16;
 var indata = Array.from({length:ch_nums},x=>Array.from({length:totTime}, y=>0));
 var newdata = [];
-var scale=10000;
+var scale=0.5;
 var timeend=-1;
 function crateExperiment(){
 	$.ajax({
@@ -60,6 +81,19 @@ function crateExperiment(){
 function createFilter(){
 	$.ajax({
         url: baseurl+"createFilter",
+        //请求地址
+        type: "get",
+        //请求方式
+		data: {"low":1,"high":40,"sampleRate":250},
+        success: function(data) { //回调函数：数据请求成功之后调用
+            //console.log(data)
+			console.log(data)
+        }
+    })
+}
+function predictOnce(){
+	$.ajax({
+        url: baseurl+"getResult",
         //请求地址
         type: "get",
         //请求方式
@@ -96,6 +130,7 @@ function refresh() {
     var count = 0;
     echarts.util.each(indata,
     function(line) {
+        // console.log(count);
 		length=newdata[count].length;
 		line=line.slice(length);
 		line=line.concat(newdata[count]);

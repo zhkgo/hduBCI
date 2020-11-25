@@ -76,7 +76,7 @@ def createTcp():
         return "请先创建实验"
     try:
         tcp=TCPParser('localhost', 8712)
-        tcp.crate_batch(['Fz' for i in range(32)])
+        tcp.crate_batch(['FZ','FC1','FC2','C3','CZ','C4','CP1','CP2','P7','P3','PZ','P4','P8','O1','OZ','O2'])
         # experiment.filter.sampleRate=experiment.tcp.sampleRate
         experiment.set_dataIn(tcp)
     except Exception as e:
@@ -117,6 +117,7 @@ def createScaler():
     code_scaler=request.args.get("code")
     scope={}
     exec(code_scaler,scope)
+    print(scope.keys())
     scaler=scope['scaler']
     experiment.set_scaler(scaler)
     return "ok"
@@ -149,6 +150,7 @@ def getdata():
     global experiment
     print("TCP END WHEN GET DATA",experiment.tcp.end)
     arr,timeend=experiment.tcp.get_batch(request.args.get('timeend'))
+    print(arr)
     # ['Fz','Cz','Pz','P3','P4','P7','P8','Oz','O1','O2','T7','T8']
     jsonarr=json.dumps({"data":arr.tolist(),'ch_names':experiment.tcp.ch_names,'timeend':timeend})
     return jsonarr
