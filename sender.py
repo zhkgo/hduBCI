@@ -11,22 +11,22 @@ from mnelab.io import read_raw
 import matplotlib.pyplot as plt 
 import time
 datasets = []
-need_channels=['FZ','FC1','FC2','C3','CZ','C4','CP1','CP2','P7','P3','PZ','P4','P8','O1','OZ','O2']
-
-data = read_raw("data/lgw.cnt", preload=True)
-datasets.insert(0, data)
-datasets.insert(1, deepcopy(data))
-data = datasets[1]
-data.pick_channels(need_channels,ordered=True)
-data.filter(1.0, 40.0)
+# need_channels=['FZ','FC1','FC2','C3','CZ','C4','CP1','CP2','P7','P3','PZ','P4','P8','O1','OZ','O2']
+need_channels=['Fz' for i in range(33)]
+# data = read_raw("data/lgw.cnt", preload=True)
+# datasets.insert(0, data)
+# datasets.insert(1, deepcopy(data))
+# data = datasets[1]
+# data.pick_channels(need_channels,ordered=True)
+# data.filter(1.0, 40.0)
 # data.pick_channels(['O1','O2'],ordered=True)
-data,_= data[:,:]
-data=data.astype(np.float32).T
-data=np.ascontiguousarray(data)
-mbytes=BytesIO()
-mbytes.write(data)
+# data,_= data[:,:]
+# data=data.astype(np.float32).T
+# data=np.ascontiguousarray(data)
+# mbytes=BytesIO()
+# mbytes.write(data)
 # printMem(a)
-# data=np.load("data/log20201117172718.npy")
+data=np.load("data/log20201117172718.npy").tolist()
 import socket
 import os
 #声明类型，生成socket链接对象
@@ -37,7 +37,8 @@ server.bind(('localhost',8712))
 
 server.listen(5)
 channels=len(need_channels)
-endlen=len(mbytes.getvalue())
+# endlen=len(mbytes.getvalue())
+endlen=len(data)
 # data=data.astype('bytes')
 try:
     while True:
@@ -46,7 +47,8 @@ try:
         print("客户端%s已连接"%(conn))
         t=0
         while True:
-            conn.sendall(mbytes.getvalue()[t*channels*4:t*channels*4+channels*4*20])
+            # conn.sendall(mbytes.getvalue()[t*channels*4:t*channels*4+channels*4*20])
+            conn.sendall(data[t*channels*4:t*channels*4+channels*4*20])
             time.sleep(0.02)
             t+=20
             if t>=endlen:

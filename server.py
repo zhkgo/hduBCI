@@ -76,7 +76,8 @@ def createTcp():
         return "请先创建实验"
     try:
         tcp=TCPParser('localhost', 8712)
-        tcp.crate_batch(['FZ','FC1','FC2','C3','CZ','C4','CP1','CP2','P7','P3','PZ','P4','P8','O1','OZ','O2'])
+        # ['FZ','FC1','FC2','C3','CZ','C4','CP1','CP2','P7','P3','PZ','P4','P8','O1','OZ','O2']
+        tcp.crate_batch(['FZ' for i in range(33)])
         # experiment.filter.sampleRate=experiment.tcp.sampleRate
         experiment.set_dataIn(tcp)
     except Exception as e:
