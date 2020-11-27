@@ -28,19 +28,16 @@
             <option value=10000>10000</option>
             <option value=50000>50000</option>
         </select>
-    <form action="http://localhost:10086/api/createScaler">
-		特征提取（标准化）器 对象名应该为scaler:<br>
-        <textarea name="code" cols="100" rows="100" warp="virtual"></textarea>
+        特征提取（标准化）器 路径与类名，返回函数getScaler() 点击查看demo:<br>
+        <textarea id="scalerpath" name="path" cols="60" rows="20" warp="virtual"></textarea>
+        <textarea id="scalerclass" name="class" cols="60" rows="20" warp="virtual"></textarea>
 				<br>
-	<input type="submit" value="提交代码">
-	</form> 
-	<form action="http://localhost:10086/api/createClassfier">
-        分类器 对象名应该为scaler:<br>
-        
-        <textarea name="code" cols="100" rows="100" warp="virtual"></textarea>
+	<input type="button" onclick="postScaler()" value="提交代码">
+        分类器 对象名应该为路径与类名，返回函数getModel() 点击查看demo:<br>
+        <textarea id="classpath" name="path" cols="60" rows="20" warp="virtual"></textarea>
+        <textarea id="classclass" name="class" cols="60" rows="20" warp="virtual"></textarea>
 				<br>
-	<input type="submit" value="提交代码">
-	</form> 
+	<input type="button" onclick="postClass()" value="提交代码">
 	<input type="button" value="获取预测结果" onclick="predictOnce()" /> 
    <div id="container" style="height: 2000px"></div> 
 	
@@ -264,7 +261,34 @@ function stopParse() {
         }
     })
 }
-loopId = setInterval(getdata,200);
+function postScaler() {
+        path = $("#scalerpath").val();
+        classname=$("#scalerclass").val();
+        console.log(path)
+        $.ajax({
+            type: "get",
+            url: baseurl+"createScaler",
+            data : {"path":path,"class":classname},
+            success: function(msg) {
+                console.log(msg);
+            }
+        });
+        return false;
+    }
+function postClass() {
+    path = $("#classpath").val();
+    classname=$("#classclass").val();
+    $.ajax({
+        type: "get",
+        url: baseurl+"createClassfier",
+        data : {"path":path,"class":classname},
+        success: function(msg) {
+            console.log(msg);
+        }
+    });
+    return false;
+}
+// loopId = setInterval(getdata,200);
        </script>  
  </body>
 </html>

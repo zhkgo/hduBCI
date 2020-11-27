@@ -16,6 +16,7 @@ class Experiment:
         self.res=np.zeros((3600,1))
         self.done=False
         self.tcpThread = None
+        self.windows=1000
         # self.end=0
     def finish(self):
         self.done=True
@@ -63,7 +64,7 @@ class Experiment:
     def predictOnce(self):
         assert self.tcp !=None ,"接入数据不能为空"
         assert self.classfier !=None, "分类器不能为空"
-        data=self.tcp.getCur()
+        data=self.tcp.getCur(self.windows)
         if self.filter:
             data=self.filter.deal(data)
         data=data.reshape(1,data.shape[0],data.shape[1])

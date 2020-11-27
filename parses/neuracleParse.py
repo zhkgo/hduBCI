@@ -79,7 +79,9 @@ class TCPParser:  # The script contains one main class which handles Streamer da
         self.buffer = self.buffer[ 4* tot:]
 
         return 8 * tot
-
+    def getCur(self,windows):
+        myend=self.end
+        return self.signals[:,myend-windows:myend]
     def parse_data(self):
         while not self.done:
             data = self.sock.recv(921600)

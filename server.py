@@ -6,7 +6,7 @@ Created on Fri Nov  6 15:40:45 2020
 尚未开发完成
 wait for finish
 """
-
+import importlib
 from flask import Flask,request
 from flask import render_template
 import json
@@ -107,19 +107,20 @@ def stopTcp():
     except Exception as e:
         return str(e)
     return "ok"
-
 #创建特征提取器
 @app.route("/api/createScaler")
 def createScaler():
     global experiment
     if experiment==None:
         return "请先创建实验"
-    code_scaler=request.args.get("code")
-    scope={}
-    exec(code_scaler,scope)
-    print(scope.keys())
-    scaler=scope['scaler']
-    experiment.set_scaler(scaler)
+    code_path=request.args.get("path")
+    code_scaler=request.args.get("class")
+    # class_name=importlib.import_module(code_scaler)
+    module =importlib.import_module(code_path)
+    content="globals()['"+code_scaler+"']=module."+code_scaler
+    exec(content)
+    experiment.set_scaler(module.getScaler())
+    assert  experiment.scaler!=None
     return "ok"
 #创建分类器
 @app.route("/api/createClassfier")
@@ -127,11 +128,13 @@ def createClassfier():
     global experiment
     if experiment==None:
         return "请先创建实验"
-    code_clf=request.args.get("code")
-    scope={}
-    exec(code_clf,scope)
-    clf=scope['clf']
-    experiment.set_classfier(clf)
+    code_path=request.args.get("path")
+    code_clf=request.args.get("class")
+    # class_name=importlib.import_module(code_scaler)
+    module =importlib.import_module(code_path)
+    content="globals()['"+code_clf+"']=module."+code_clf
+    exec(content)
+    experiment.set_classfier(module.getModel())
     return "ok"
 
 @app.route("/api/getResult")
