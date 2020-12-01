@@ -7,7 +7,7 @@ Created on Thu Nov 12 13:43:13 2020
 from io import BytesIO
 from copy import deepcopy
 import numpy as np
-from mnelab.io import read_raw
+from mne.io import read_raw
 import matplotlib.pyplot as plt 
 import time
 datasets = []

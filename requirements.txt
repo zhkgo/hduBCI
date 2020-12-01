@@ -1,0 +1,6 @@
+scipy==1.1.0
+matplotlib==3.3.3
+mne==0.21.2
+Flask==1.1.2
+numpy==1.15.4
+scikit_learn==0.20.0
