@@ -6,15 +6,16 @@ Created on Fri Nov  6 15:40:45 2020
 尚未开发完成
 wait for finish
 """
-import importlib
-from flask import Flask,request
-from flask import render_template
-import json
+
+from werkzeug.utils import secure_filename
+from flask import request, Flask,render_template
 from bcifilter import BciFilter
 from experiment import Experiment
 from parses.neuracleParse import TCPParser
+from myresponse import success,fail
+import importlib
+import os
 app = Flask(__name__)
-
 @app.route('/datashow')
 def dataShow():
     return  render_template("dataShow.html")
@@ -23,38 +24,34 @@ def dataShow():
 def index():
     return render_template("index.html")
 
-# @app.route('/api/stop')
-# def stop():
-#     global tcp,data_thread
-#     tcp.done = True
-#     tcp.close()
-#     tcp=None
-#     data_thread.join()
-#     return  "ok"
 
-# @app.route('/api/start')
-# def start():
-#     global data_thread,experiment
-#     tcp = TCPParser('localhost', 8712)
-#     tcp.crate_batch(['Fz' for i in range(32)])
-#     data_thread = threading.Thread(target=tcp.parse_data)
-#     data_thread.start()
-#     return  "ok"
 
 #创建实验
 @app.route("/api/createExperiment")
 def createExperiment():
     global experiment
     if experiment!=None:
-        return "实验已存在，无需创建，或者请先删除"
-    experiment=Experiment()
-    return "ok"
+        return fail("实验已存在，无需创建，或者请先删除")
+    try:    
+        experiment=Experiment()
+        sessions=int(request.args.get('sessions'))
+        trials=int(request.args.get('trials'))
+        duration=int(request.args.get('duration'))
+        interval=int(request.args.get('interval'))
+        tmin=int(request.args.get('tmin'))
+        tmax=int(request.args.get('tmax'))
+        device=int(request.args.get('device'))
+        experiment.setParameters(sessions,trials,duration,interval,tmin,tmax,device)
+    except Exception as e:
+        return fail(str(e))
+    return success()
+
 #设置预处理器
 @app.route("/api/createFilter")
 def createFilter():
     global experiment
     if experiment==None:
-        return "请先创建实验"
+        return fail("请先创建实验")
     low=1
     high=40
     sampleRateFrom=1000
@@ -63,38 +60,41 @@ def createFilter():
         low=float(request.args.get('low'))
         high=float(request.args.get('high'))
         sampleRateTo=int(request.args.get('sampleRate'))
-    except:
-        return "error In get Parameters"
-    mfilter=BciFilter(low,high,sampleRateFrom,sampleRateTo)
-    experiment.set_filter(mfilter)
-    return "ok"
+        channels=eval(request.args.get('channels'))
+        idxs=experiment.set_channel(channels)
+        mfilter=BciFilter(low,high,sampleRateFrom,sampleRateTo,idxs)
+        experiment.set_filter(mfilter)
+    except Exception as e:
+        return fail(str(e))
+
+    return success()
+
 #创建TCP连接
 @app.route("/api/createTcp")
 def createTcp():
     global experiment
     if experiment==None:
-        return "请先创建实验"
+        return fail("请先创建实验")
     try:
         tcp=TCPParser('localhost', 8712)
-        # ['FZ','FC1','FC2','C3','CZ','C4','CP1','CP2','P7','P3','PZ','P4','P8','O1','OZ','O2']
-        tcp.crate_batch(['FZ' for i in range(9  )])
-        # experiment.filter.sampleRate=experiment.tcp.sampleRate
+        ch_nums=experiment.device_channels
+        tcp.crate_batch(ch_nums)
         experiment.set_dataIn(tcp)
     except Exception as e:
-        return str(e)
-    return "ok"
+        return fail(str(e))
+    return success()
 
 #开始接收解析数据
 @app.route("/api/startTcp")
 def startTcp():
     global experiment
     if experiment==None:
-        return "请先创建实验"
+        return fail("请先创建实验")
     try:
         experiment.start_tcp()
     except Exception as e:
-        return str(e)
-    return "ok"
+        return fail(str(e))
+    return success()
 
 
 #停止TCP连接
@@ -102,65 +102,65 @@ def startTcp():
 def stopTcp():
     global experiment
     if experiment==None:
-        return "请先创建实验"
+        return fail("请先创建实验")
     try:
         experiment.stop_tcp()
     except Exception as e:
-        return str(e)
-    return "ok"
-#创建特征提取器
-@app.route("/api/createScaler")
-def createScaler():
-    global experiment
-    if experiment==None:
-        return "请先创建实验"
-    code_path=request.args.get("path")
-    code_scaler=request.args.get("class")
-    # class_name=importlib.import_module(code_scaler)
-    module =importlib.import_module(code_path)
-    content="globals()['"+code_scaler+"']=module."+code_scaler
-    exec(content)
-    experiment.set_scaler(module.getScaler())
-    assert  experiment.scaler!=None
-    return "ok"
-#创建分类器
+        return fail(str(e))
+    return success()
+
+
 @app.route("/api/createClassfier")
 def createClassfier():
     global experiment
     if experiment==None:
-        return "请先创建实验"
-    code_path=request.args.get("path")
-    code_clf=request.args.get("class")
-    # class_name=importlib.import_module(code_scaler)
-    module =importlib.import_module(code_path)
-    content="globals()['"+code_clf+"']=module."+code_clf
-    exec(content)
-    experiment.set_classfier(module.getModel())
-    return "ok"
+        return fail("请先创建实验")
+    try:
+        module=importlib.import_module("models.classfier")
+        for name in module.getClassName():
+            content="globals()['"+name+"']=module."+name
+            exec(content)
+        experiment.set_classfier(module.getModel())
+    except Exception as e:
+        return fail(str(e))
+    return success()
+
+@app.route('/api/upload', methods=['POST', 'GET'])
+def upload():
+    if request.method == 'POST':
+        f = request.files['file']
+        basepath = os.path.dirname(__file__)
+        upload_path = os.path.join(basepath, 'models',secure_filename(f.filename))
+        f.save(upload_path)
+        # print(f.filename)
+        return success({"filename":f.filename})
+    return fail("必须使用post方法上传文件")
 
 @app.route("/api/getResult")
 def getResult():
     global experiment
-    return experiment.predictOnce()
+    res=experiment.predictOnce()
+    return success(res)
 
 @app.route("/api/saveData")
 def savedata():
     global experiment
     experiment.tcp.saveData()
-    return "ok"
+    return success()
 
 @app.route('/api/getdata')
 def getdata():
     global experiment
     print("TCP END WHEN GET DATA",experiment.tcp.end)
-    arr,timeend=experiment.tcp.get_batch(request.args.get('timeend'))
+    timeend=request.args.get('timeend')
+    arr,timeend=experiment.tcp.get_batch(timeend)
     print(arr)
     # ['Fz','Cz','Pz','P3','P4','P7','P8','Oz','O1','O2','T7','T8']
-    jsonarr=json.dumps({"data":arr.tolist(),'ch_names':experiment.tcp.ch_names,'timeend':timeend})
-    return jsonarr
+    return success({"data":arr.tolist(),'ch_names':experiment.tcp.ch_names,'timeend':timeend})
     
 if __name__ == '__main__':
-    app.debug = True # 设置调试模式，生产模式的时候要关掉debug
+    app.debug = False # 设置调试模式，生产模式的时候要关掉debug
     experiment = None
+    app.config['JSON_AS_ASCII'] = False
     app.run(port=10086) 
 

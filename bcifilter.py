@@ -8,21 +8,24 @@ from scipy import signal
 from scipy.signal import butter
 from scipy.signal import resample
 class BciFilter:
-    def __init__(self,low=1,high=40,sampleRate=1000,sampleRateTo=1000):
+    def __init__(self,low=1,high=40,sampleRate=1000,sampleRateTo=1000,idxs=[]):
         self.low=low
         self.high=high
         self.sampleRate=sampleRate
         self.sampleRateTo=sampleRateTo
-        
+        self.idxs=idxs
         # 8表示8阶
         nyq=self.sampleRate/2
         low=self.low/nyq
         high=self.high/nyq
         self.b,self.a=butter(8,[low,high],'bandpass')
+        
     def deal(self,data):
         #先滤波后降采样
+        data=data[self.idxs]
         data=signal.filtfilt(self.b,self.a,data)
         secs=data.shape[1]/self.sampleRate
         samps=int(secs*self.sampleRateTo)
         data=resample(data,samps,axis=1)
+        self.ch_names
         return data
