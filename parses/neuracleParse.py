@@ -67,7 +67,7 @@ class TCPParser:  # The script contains one main class which handles Streamer da
         self.signals[:,self.end:self.end+size]=batchbuffer
         self.end=self.end+size                
         # 更新buffer
-        print("-----Signals已更新-------END:",self.end)
+        # print("-----Signals已更新-------END:",self.end)
         self.buffer = self.buffer[ 4* tot:]
 
         return 8 * tot
@@ -81,11 +81,11 @@ class TCPParser:  # The script contains one main class which handles Streamer da
             self.buffer += data
             # 4表示四个字节 一个单精度
             # 0.02表示拿到0.02秒的数据就更新signals
-            print("=======================receive Data===================")
+            # print("=======================receive Data===================")
             if len(self.buffer) > 4 * len(self.ch_names) * self.sampleRate * 0.02:
                 # with open("getdata.txt","w") as f:
                 #     f.write("here")
-                print("=======================parse Data===================")
+                # print("=======================parse Data===================")
                 points = len(self.buffer) // (4 * len(self.ch_names))
                 self.bufferToSignal(points)
                 # time.sleep(5)

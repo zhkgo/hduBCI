@@ -5,3 +5,4 @@
 tester.py
 *.pyc
  __pycache__/ 
+ /models

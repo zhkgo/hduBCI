@@ -9,13 +9,24 @@ wait for finish
 
 from werkzeug.utils import secure_filename
 from flask import request, Flask,render_template
+from threading import Lock
+import threading
 from bcifilter import BciFilter
 from experiment import Experiment
 from parses.neuracleParse import TCPParser
 from myresponse import success,fail
 import importlib
+from  gevent.pywsgi import WSGIServer
+# from  geventwebsocket.websocket import WebSocket,WebSocketError
+from  geventwebsocket.handler import WebSocketHandler
 import os
+import traceback
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
+app.debug = False # 设置调试模式，生产模式的时候要关掉debug
+_thread=None #实验进行时的通讯线程
+lock=Lock()
+experiment = None
 @app.route('/datashow')
 def dataShow():
     return  render_template("dataShow.html")
@@ -24,14 +35,37 @@ def dataShow():
 def index():
     return render_template("index.html")
 
-
-
+def backgroun_task(user_socket):
+    global experiment
+    while True:
+        res=experiment.predictThread()
+        if type(res) is str:
+            break
+        user_socket.send(success(res))
+        
+@app.route('/ws/startExperiment')
+def startExperiment():
+    global experiment,_thread
+    user_socket=request.environ.get("wsgi.websocket")
+    if not user_socket:
+        return fail("请以WEBSOCKET方式连接")
+    try:
+        experiment.start()
+        print("实验开始")
+        with lock:
+            if _thread is None:
+                _thread =threading.Thread(target=backgroun_task,args=(user_socket,))
+                _thread.start()
+                _thread.join()
+        _thread=None
+        return success("实验结束")
+    except Exception as e:
+        traceback.print_exc()
+        return fail(str(e))
 #创建实验
 @app.route("/api/createExperiment")
 def createExperiment():
     global experiment
-    if experiment!=None:
-        return fail("实验已存在，无需创建，或者请先删除")
     try:    
         experiment=Experiment()
         sessions=int(request.args.get('sessions'))
@@ -43,6 +77,7 @@ def createExperiment():
         device=int(request.args.get('device'))
         experiment.setParameters(sessions,trials,duration,interval,tmin,tmax,device)
     except Exception as e:
+        traceback.print_exc()
         return fail(str(e))
     return success()
 
@@ -65,6 +100,7 @@ def createFilter():
         mfilter=BciFilter(low,high,sampleRateFrom,sampleRateTo,idxs)
         experiment.set_filter(mfilter)
     except Exception as e:
+        traceback.print_exc()
         return fail(str(e))
 
     return success()
@@ -81,6 +117,7 @@ def createTcp():
         tcp.crate_batch(ch_nums)
         experiment.set_dataIn(tcp)
     except Exception as e:
+        traceback.print_exc()
         return fail(str(e))
     return success()
 
@@ -93,6 +130,7 @@ def startTcp():
     try:
         experiment.start_tcp()
     except Exception as e:
+        traceback.print_exc()
         return fail(str(e))
     return success()
 
@@ -106,6 +144,7 @@ def stopTcp():
     try:
         experiment.stop_tcp()
     except Exception as e:
+        print(e.with_traceback())
         return fail(str(e))
     return success()
 
@@ -122,6 +161,7 @@ def createClassfier():
             exec(content)
         experiment.set_classfier(module.getModel())
     except Exception as e:
+        traceback.print_exc()
         return fail(str(e))
     return success()
 
@@ -139,8 +179,12 @@ def upload():
 @app.route("/api/getResult")
 def getResult():
     global experiment
-    res=experiment.predictOnce()
-    return success(res)
+    try:
+        res=experiment.predictOnce()
+    except Exception as e:
+        traceback.print_exc()
+        return fail(str(e))
+    return success({"result":int(res)})
 
 @app.route("/api/saveData")
 def savedata():
@@ -154,16 +198,15 @@ def getdata():
     print("TCP END WHEN GET DATA",experiment.tcp.end)
     try:
         timeend=int(request.args.get('timeend'))
-        arr,timeend=experiment.getData(timeend)
+        arr,rend=experiment.getData(timeend)
         # print(arr)
     except Exception as e:
+        traceback.print_exc()
         return fail(str(e))
     # ['Fz','Cz','Pz','P3','P4','P7','P8','Oz','O1','O2','T7','T8']
-    return success({"data":arr.tolist(),'ch_names':experiment.tcp.ch_names,'timeend':timeend})
+    return success({"data":arr.tolist(),'ch_names':experiment.channels,'timeend':rend})
     
 if __name__ == '__main__':
-    app.debug = False # 设置调试模式，生产模式的时候要关掉debug
-    experiment = None
-    app.config['JSON_AS_ASCII'] = False
-    app.run(port=10086) 
+    http_serve=WSGIServer(("0.0.0.0",10086),app,handler_class=WebSocketHandler)
+    http_serve.serve_forever()
 

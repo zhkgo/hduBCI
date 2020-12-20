@@ -48,7 +48,7 @@ try:
         while True:
             # conn.sendall(mbytes.getvalue()[t*channels*4:t*channels*4+channels*4*20])
             conn.sendall(data[t*channels*4:t*channels*4+channels*4*20])
-            time.sleep(0.02)
+            time.sleep(0.5)
             t+=20
             if t>=endlen:
                 t=0

@@ -6,6 +6,7 @@ Created on Sat Nov 21 20:41:30 2020
 """
 import threading
 import numpy as np
+import time
 class Experiment:
     def __init__(self):
         self.CHANNELS=[
@@ -31,7 +32,7 @@ class Experiment:
         self.tmax=0 #截取时间终点（相比于trail开始的时间点 单位ms）
         self.device=0  #device= 0 博瑞康 device=1 nueroscan 
         self.device_channels=[]
-        
+        self.events=[]
         # self.end=0
     def finish(self):
         self.done=True
@@ -52,6 +53,12 @@ class Experiment:
         self.interval=interval
         self.tmin=tmin
         self.tmax=tmax
+        cur=0
+        for i in range(self.sessions):
+            for j in range(self.trials):    
+                self.events.append(cur)
+                cur+=self.duration
+            cur+=self.interval
         self.device=device
         assert device<2,"设备编号应当小于2"
         self.device_channels=self.CHANNELS[self.device]
@@ -72,11 +79,12 @@ class Experiment:
     #获取指定位置的数据 如果传入-1 或者过大的时间值，则返回最新的，
     #若存在滤波器，会在数据返回之前进行滤波
     #windows为长度 startpos为起点
+    # 返回滤波后数据和数据截止时间点
     def getData(self,startpos:int,windows=1000):
-        data=self.tcp.get_batch(startpos,maxlength=windows)
+        data,rend=self.tcp.get_batch(startpos,maxlength=windows)
         if self.filter:
             data=self.filter.deal(data)
-        return data
+        return data,rend
     def set_scaler(self,scaler):
         # assert hasattr(scaler,"fit"),"特征提取器不存在fit函数"
         assert hasattr(scaler,"fit_transform"),"特征提取器不存在fit_transform函数"
@@ -86,25 +94,25 @@ class Experiment:
         # assert hasattr(clf,'fit'),"分类器不存在fit函数"
         assert hasattr(clf, 'predict'),"分类器不存在predict函数"
         self.classfier = clf
+    def predictThread(self):
+        eventslen=len(self.events)
+        while self.i<eventslen:
+            if self.startTime+self.events[self.i]+self.tmax<self.tcp.end:
+                self.res[self.i]=self.predictOnce(self.startTime+self.events[self.i]+self.tmin,self.tmax-self.tmin)
+                # np.roll(self.res,1,axis=0)
+                self.i+=1
+                return int(self.res[self.i-1])
+        return "实验结束"
     def start(self):
         assert self.tcp !=None ,"接入数据不能为空"
         assert self.classfier !=None, "分类器不能为空"
-        while not self.done:
-            data=self.tcp.getCur()
-            if self.filter:
-                data=self.filter.deal(data)
-            data=np.expand_dims(data,axis=0)
-            # if self.scaler:
-            #     data=self.scaler.transform(data)
-            self.res[0]=self.classfier.predict(data)
-            np.roll(self.res,1,axis=0)
-    def predictOnce(self):
+        self.startTime=self.tcp.end
+        self.i=0
+        
+    def predictOnce(self,startpos=-1,windows=1000):
         assert self.tcp !=None ,"接入数据不能为空"
         assert self.classfier !=None, "分类器不能为空"
-        data=self.tcp.getCur(self.windows)
-        # print(data.shape)
-        if self.filter:
-            data=self.filter.deal(data)
+        data,_=self.getData(startpos,windows=windows)
         data=np.expand_dims(data,axis=0)
         # if self.scaler:
         #     data=self.scaler.transform(data)
