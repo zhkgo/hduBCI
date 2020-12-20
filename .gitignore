@@ -4,3 +4,4 @@
 */__pycache__/*
 tester.py
 *.pyc
+ __pycache__/ 

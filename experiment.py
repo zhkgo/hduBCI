@@ -105,7 +105,6 @@ class Experiment:
         # print(data.shape)
         if self.filter:
             data=self.filter.deal(data)
-
         data=np.expand_dims(data,axis=0)
         # if self.scaler:
         #     data=self.scaler.transform(data)
