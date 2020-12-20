@@ -69,7 +69,14 @@ class Experiment:
         for item in ch_names:
             idxs.append(self.device_channels.index(item))
         return idxs
-    
+    #获取指定位置的数据 如果传入-1 或者过大的时间值，则返回最新的，
+    #若存在滤波器，会在数据返回之前进行滤波
+    #windows为长度 startpos为起点
+    def getData(self,startpos:int,windows=1000):
+        data=self.tcp.get_batch(startpos,maxlength=windows)
+        if self.filter:
+            data=self.filter.deal(data)
+        return data
     def set_scaler(self,scaler):
         # assert hasattr(scaler,"fit"),"特征提取器不存在fit函数"
         assert hasattr(scaler,"fit_transform"),"特征提取器不存在fit_transform函数"
@@ -86,9 +93,9 @@ class Experiment:
             data=self.tcp.getCur()
             if self.filter:
                 data=self.filter.deal(data)
-            data=data.reshape(1,data.shape[0],data.shape[1])
-            if self.scaler:
-                data=self.scaler.transform(data)
+            data=np.expand_dims(data,axis=0)
+            # if self.scaler:
+            #     data=self.scaler.transform(data)
             self.res[0]=self.classfier.predict(data)
             np.roll(self.res,1,axis=0)
     def predictOnce(self):
@@ -98,9 +105,10 @@ class Experiment:
         # print(data.shape)
         if self.filter:
             data=self.filter.deal(data)
-        print(data.shape)
+
         data=np.expand_dims(data,axis=0)
-        if self.scaler:
-            data=self.scaler.transform(data)
+        # if self.scaler:
+        #     data=self.scaler.transform(data)
+        print(data.shape)
         label=self.classfier.predict(data)[0]
         return label

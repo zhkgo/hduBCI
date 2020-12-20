@@ -152,9 +152,12 @@ def savedata():
 def getdata():
     global experiment
     print("TCP END WHEN GET DATA",experiment.tcp.end)
-    timeend=request.args.get('timeend')
-    arr,timeend=experiment.tcp.get_batch(timeend)
-    print(arr)
+    try:
+        timeend=int(request.args.get('timeend'))
+        arr,timeend=experiment.getData(timeend)
+        # print(arr)
+    except Exception as e:
+        return fail(str(e))
     # ['Fz','Cz','Pz','P3','P4','P7','P8','Oz','O1','O2','T7','T8']
     return success({"data":arr.tolist(),'ch_names':experiment.tcp.ch_names,'timeend':timeend})
     

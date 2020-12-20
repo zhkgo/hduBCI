@@ -26,6 +26,7 @@ class BciFilter:
         data=signal.filtfilt(self.b,self.a,data)
         secs=data.shape[1]/self.sampleRate
         samps=int(secs*self.sampleRateTo)
-        data=resample(data,samps,axis=1)
-        self.ch_names
+        if samps>0:
+            data=resample(data,samps,axis=1)
+        # self.ch_names
         return data

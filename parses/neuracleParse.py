@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import threading
 import numpy as np
 import time
-from scipy.signal import resample
+
 class TCPParser:  # The script contains one main class which handles Streamer data packet parsing.
 
     def __init__(self, host, port):
@@ -45,24 +45,16 @@ class TCPParser:  # The script contains one main class which handles Streamer da
         self.sampleRate = sampleRate
         self.signals = np.zeros((len(ch_names), 3600000))
         self.buffer = b''
-    def get_batch(self,startPos,maxlength=1000):
-        # with open("buffer.txt","w") as f:
-        #     f.write(str(self.signals[:,-1000:]))
-        # print("innerBatch",id(self.end))
-        print(type(startPos),startPos)
-        startPos=int(startPos)
+    #获取指定位置的数据 如果传入-1 或者过大的时间值，则返回最新的，
+    #若存在滤波器，会在数据返回之前进行滤波
+    #windows为长度 startpos为起点
+    def get_batch(self,startPos:int,maxlength=1000):
         if startPos<=-1 :
             startPos=self.end-maxlength
         rend=min(self.end,startPos+maxlength)
-        secs=(rend-startPos)/self.sampleRate
-        samps=int(secs*100)
-        arr=None
-        print("startPos",startPos," rend",rend)
-        if samps!=0:
-            arr=resample(self.signals[:,startPos:rend],samps,axis=1)
-        else:
-            arr=self.signals[:,startPos:rend]
+        arr=self.signals[:,startPos:rend]
         return arr,rend
+    
     def bufferToSignal(self, size):
         batchbuffer = []
         tot = size * len(self.ch_names)
