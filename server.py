@@ -21,9 +21,11 @@ from  gevent.pywsgi import WSGIServer
 from  geventwebsocket.handler import WebSocketHandler
 import os
 import traceback
+from flask_cors import CORS
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.debug = False # 设置调试模式，生产模式的时候要关掉debug
+CORS(app, supports_credentials=True)
 _thread=None #实验进行时的通讯线程
 lock=Lock()
 experiment = None
