@@ -116,6 +116,6 @@ class Experiment:
         data=np.expand_dims(data,axis=0)
         # if self.scaler:
         #     data=self.scaler.transform(data)
-        print(data.shape)
+        # print(data.shape)
         label=self.classfier.predict(data)[0]
         return label

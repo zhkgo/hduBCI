@@ -197,7 +197,7 @@ def savedata():
 @app.route('/api/getdata')
 def getdata():
     global experiment
-    print("TCP END WHEN GET DATA",experiment.tcp.end)
+    # print("TCP END WHEN GET DATA",experiment.tcp.end)
     try:
         timeend=int(request.args.get('timeend'))
         arr,rend=experiment.getData(timeend)

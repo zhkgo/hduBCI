@@ -18,7 +18,7 @@ class BciFilter:
         nyq=self.sampleRate/2
         low=self.low/nyq
         high=self.high/nyq
-        self.b,self.a=butter(8,[low,high],'bandpass')
+        self.b,self.a=butter(4,[low,high],'bandpass')
         
     def deal(self,data):
         #先滤波后降采样
