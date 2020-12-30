@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>在线测试</title>
+    <script src="./js/jquery-plugins.js"></script>
+<!--    <script src="./js/bootstrap.js"></script>-->
+
+<!--    <link href="./css/bootstrap.css" rel="stylesheet" />-->
+    <link href="./css/bootstrap-3.3.4.css" rel="stylesheet"/>
+    <link href="./css/uploadifive.css" rel="stylesheet" />
+    <link href="./css/online.css" rel="stylesheet"/>
+    <link href="./css/doc-08164a0eeb.css" rel="stylesheet">
+    <link href="./css/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="./css/animate.css" rel="stylesheet">
+    <link href="./css/style_form.css" rel="stylesheet">
+    <link href="./css/plugins/iCheck/custom.css" rel="stylesheet">
+<!--    <link href="./css/plugins/dropzone/basic.css" rel="stylesheet">-->
+<!--    <link href="./css/plugins/dropzone/dropzone.css" rel="stylesheet">-->
+    <link href="./css/plugins/chosen/chosen.css" rel="stylesheet">
+    <link href="./css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
+    <link/>
+    <style>
+        html, body {
+            background-color: rgb(245, 245, 245);
+        }
+        body {
+            height: 950px;
+        }
+
+        .left-container {
+            background-color: rgb(253, 253, 253);
+            width: 40%;
+            min-height: 700px;
+            margin-left: 7%;
+            border: none;
+            font-family: -apple-system, BlinkMacSystemFont, PingFang SC, Helvetica, Tahoma, Arial, Hiragino Sans GB, Microsoft YaHei, "\5FAE\8F6F\96C5\9ED1", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            height: auto !important;
+            box-shadow: 0 1px 5px #ddd;
+            float: left;
+            position: relative;
+        }
+
+        .right-container {
+            width: 40%;
+            height: 700px;
+            float: right;
+            margin-right: 7%;
+            box-shadow: 0 1px 5px #ddd;
+            padding: 28px 32px;
+        }
+
+        .console-title {
+            color: #777;
+            font-size: 25px;
+            border-bottom: 1px solid #BBB;
+            padding-bottom: 16px;
+            width: 100%;
+            display: block;
+            margin-bottom: 30px;
+        }
+
+        .console-body {
+            height: 560px;
+            overflow-y: scroll;
+        }
+
+        .console-body span {
+            display: block;
+            font-family: '微软雅黑';
+            margin-bottom: 2px;
+        }
+
+        .console-body::-webkit-scrollbar {
+            display: none;
+        }
+
+        .canvas-eeg::-webkit-scrollbar {
+            display: none;
+        }
+        
+        #form1 {
+            width: 78%;
+            left: 9%;
+            background-color: rgb(253, 253, 253);
+            position: absolute;
+            z-index: 999;
+            padding: 32px;
+        }
+        
+        #form2 {
+            width: 78%;
+            left: 150px;
+            background-color: rgb(253, 253, 253);
+            position: absolute;
+            opacity: 0;
+            padding: 32px;
+        }
+
+        #form3 {
+            width: 85%;
+            left: 150px;
+            background-color: rgb(253, 253, 253);
+            position: absolute;
+            opacity: 0;
+            padding: 32px;
+        }
+        h2 {
+            font-family: "微软雅黑";
+            font-weight: 400;
+        }
+
+        .chosen-container-multi .chosen-choices li.search-choice {
+            background: #f1f1f1;
+            border: 1px solid #ededed;
+            border-radius: 2px;
+            box-shadow: none;
+        }
+
+        .icon-btn {
+            margin-left:1.3%;
+            box-shadow: 0 1px 5px #ddd;
+            margin-top: 300px;
+            width: 50px;
+            height: 50px;
+            float: left;
+            border-radius: 25px;
+            padding-left: 14px;
+            padding-top: 8.5px;
+            background-color: rgb(249, 249, 249);
+            z-index: 99999;
+        }
+
+        .icon-btn:hover {
+            background-color: rgb(245, 245, 245);
+        }
+
+        .icon-run {
+            font-size: 27px;
+            color: rgb(55,138,62);
+            margin-top:1px;
+        }
+
+        .canvas-eeg {
+            width: 637px;
+            height: 700px;
+            overflow-y: scroll;
+            float: left;
+            background-color: rgb(252,252,253);
+        }
+    </style>
+</head>
+<body>
+<div style="position: relative; padding-top:20px;">
+    <img src="./img/BCI_title1.jpg"
+         style="border-bottom: 1px solid #E0DCDD; width: 800px; height:auto; margin-left: 7%; margin-top:20px; padding-bottom:20px;margin-bottom: 45px;">
+</div>
+<div class="left-container">
+    <form id="form1" class="form-horizontal">
+        <h2>实验参数设置</h2>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">实验总次数</label>
+            <div class="col-sm-7"><input type="text" class="form-control param1"></div>
+            <label class="col-sm-1 control-label">次</label>
+        </div>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group"><label class="col-sm-4 control-label">单个实验试次数</label>
+            <div class="col-sm-7"><input type="text" class="form-control param2"></div>
+            <label class="col-sm-1 control-label">次</label>
+        </div>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group"><label class="col-sm-4 control-label">实验休息间隔</label>
+            <div class="col-sm-7"><input type="text" class="form-control param3"></div>
+            <label class="col-sm-1 control-label">ms</label>
+        </div>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group"><label class="col-sm-4 control-label">试次开始时间</label>
+            <div class="col-sm-7"><input type="text" class="form-control param4"></div>
+            <label class="col-sm-1 control-label">ms</label>
+        </div>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group"><label class="col-sm-4 control-label">有效数据长度</label>
+            <div class="col-sm-7"><input type="text" class="form-control param5"></div>
+            <label class="col-sm-1 control-label">ms</label>
+        </div>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group"><label class="col-sm-4 control-label">数据间隔步长</label>
+            <div class="col-sm-7"><input type="text" class="form-control param6"></div>
+            <label class="col-sm-1 control-label">ms</label>
+        </div>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group">
+            <div class="col-sm-12">
+                <div class="pull-right">
+                    <button class="btn btn-primary step1" type="button">下一步</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <form id="form2" class="form-horizontal">
+        <h2>预处理选择</h2>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group"><label class="col-sm-4 control-label">通道选择</label>
+            <div class="col-sm-7"><input type="text" class="form-control selected-channels" placeholder="用英文逗号隔开，例如C3,C4,Cz"></div>
+        </div>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">降采样率</label>
+            <div class="col-sm-7 resize-aug"><input type="text" class="form-control selected-samples" placeholder="1000Hz表示不进行降采样" value="1000">
+            </div>
+            <label class="col-sm-1 control-label">Hz</label>
+        </div>
+        <div class="hr-line-dashed"></div>
+
+        <div class="form-group">
+            <label class="col-sm-4 control-label">选择滤波方式</label>
+            <div class="col-sm-7">
+                <div class="input-group m-b">
+                    <div class="input-group-btn">
+                        <button data-toggle="dropdown" class="btn btn-white dropdown-toggle" type="button">常用滤波<span
+                                class="caret"></span></button>
+                        <ul class="dropdown-menu">
+                            <li><a href="javascript:;" class="choose-filter">7-32Hz带通滤波</a></li>
+                            <li><a href="javascript:;" class="choose-filter">8-30Hz带通滤波</a></li>
+                            <li><a href="javascript:;" class="choose-filter">4-40Hz带通滤波</a></li>
+                            <li><a href="javascript:;" class="choose-filter">0.1-12Hz带通滤波</a></li>
+                            <li class="divider"></li>
+                            <li><a href="javascript:;" class="choose-filter">0.1-100Hz带通滤波</a></li>
+                        </ul>
+                    </div>
+                    <input type="text" class="form-control selected-filter" placeholder="输入例如:7-20">
+                </div>
+            </div>
+            <label class="col-sm-1 control-label">Hz</label>
+        </div>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">数据增强</label>
+            <div class="col-sm-8 aug-box">
+                <div class="input-group aug-text" style="width:300px;">
+                    <select data-placeholder="选择数据增强方式" class="chosen-select pull-right select-aug" multiple style="width:100%;">
+                        <option value="高斯噪声">高斯噪声</option>
+                        <option value="数据翻转">数据翻转</option>
+                        <option value="窗口滑动5%">窗口滑动5%</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group"><label class="col-sm-4 control-label">是否保存到本地</label>
+            <div class="col-sm-8">
+                <div class="i-checks">
+                    <label style="font-size: 14px; margin-top: 5px">
+                        <div class="icheckbox_square-green" style="position: relative;">
+                            <input type="checkbox" id="is_save_mat" value="abc" style="position: absolute; opacity: 0; margin-top: 40px;">
+                            <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%;
+                            display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255);
+                            border: 0px; opacity: 0;"></ins>
+                        </div>
+                        <i></i>
+                        保存为.mat文件
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group">
+            <div class="col-sm-12">
+                <div class="pull-right">
+                    <button class="btn btn-warning step2" type="button">上一步</button>
+                    <button class="btn btn-primary step3" type="button">下一步</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div id="form3" class="form-horizontal">
+        <h2>模型上传</h2>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group"><label class="col-lg-3 control-label">文件命名规则</label>
+
+            <div class="col-lg-9"><p class="form-control-static">保存的参数请命名为model.pth，其余模型所需文件无命名要求，按顺序上传全部文件后，点击构建实验。</p></div>
+        </div>
+        <div class="hr-line-dashed"></div>
+        <div id="cloud">
+            <div id="file_queue"></div>
+            <input type="file" name="file_upload" id="file_upload" />
+        </div>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group">
+            <div class="col-sm-12">
+                <div class="pull-right">
+                    <button class="btn btn-warning step4" type="button">上一步</button>
+                    <button class="btn btn-primary step5" type="button">创建实验</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="canvas-eeg">
+        <div id="container" style="height: 2800px; width: 637px;"></div>
+    </div>
+</div>
+<div class="icon-container" style="width:6%;float:left;padding-left:10px;">
+<div class="btn btn-defaul icon-btn" style="">
+    <span class="glyphicon glyphicon-forward icon-run"></span>
+</div>
+</div>
+<div class="right-container">
+    <span class="console-title">Console Outputs</span>
+    <div class="console-body">
+    </div>
+</div>
+<script src="./js/jquery.uploadifive.js"></script>
+<script type="text/javascript" src="./echarts/echarts.min.js"></script>
+<script type="text/javascript" src="./echarts/echarts-gl.min.js"></script>
+<script type="text/javascript" src="./echarts/ecStat.min.js"></script>
+<script type="text/javascript" src="./echarts/dataTool.min.js"></script>
+<script type="text/javascript" src="./echarts/china.js"></script>
+<script type="text/javascript" src="./echarts/world.js"></script>
+<script type="text/javascript" src="./echarts/bmap.min.js"></script>
+<script src="./js/layer-plug/layer.js"></script>
+<script src="./js/plugins/chosen/chosen.jquery.js"></script>
+<!--<script src="./js/plugins/dropzone/dropzone.js"></script>-->
+<script src="./js/plugins/iCheck/icheck.min.js"></script>
+<script>
+//    var base_host = "http://192.168.149.212:10086/"
+    var base_host = "http://localhost:10086/";
+    var dom = document.getElementById("container");
+    var myChart = echarts.init(dom);
+    option = null;
+    var indata = Array.from({length:64},x=>Array.from({length:200}, y=>0));
+    var newdata = [];
+    var timeend = -1;
+    function refresh() {
+        var grids = [];
+        var xAxes = [];
+        var yAxes = [];
+        var series = [];
+        var titles = [];
+        var count = 0;
+        echarts.util.each(indata, function (line) {
+            length = newdata[count].length;
+            line = line.slice(length);
+            line = line.concat(newdata[count]);   // 连接到最后一段
+            indata[count] = line;
+            grids.push({
+                show: true, borderWidth: 0, backgroundColor: 'rgb(252,252,252)'
+            });
+            xAxes.push({
+                type: 'category', show: false, gridIndex: count,
+            });
+            yAxes.push({
+                type: 'value', show: false,
+                min: -500, max: 500, gridIndex: count
+            });
+            series.push({
+                name: '',
+                type: 'line',
+                xAxisIndex: count,
+                yAxisIndex: count,
+                data: line,
+                showSymbol: false,
+                smooth: false,
+            });
+            titles.push({
+                textAlign: 'center', text: ch_names[count], textStyle: {
+                    fontSize: 12, fontWeight: 'normal'
+                }
+            });
+            count++;
+        });
+        console.log(new Date().getTime())
+        var lineheight = Math.ceil(100 / count) + '%';
+        echarts.util.each(grids, function (grid, idx) {
+            grid.left = '0%';
+            grid.top = Math.ceil(100 / count) * idx + '%';
+            grid.width = '100%';
+            grid.height = lineheight;
+            titles[idx].left = '1%';
+            titles[idx].top = parseFloat(grid.top) + '%';
+        });
+        option = {title: titles, grid: grids, xAxis: xAxes, yAxis: yAxes, series: series};
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    }
+    function getdata() {
+        $.ajax({
+            url: base_host + "api/getdata", //请求地址
+            type: "get", //请求方式
+            data: {'timeend': timeend}, dataType: "json", //这里的data:发送给服务器的请求数据
+            success: function (dat) { //回调函数：数据请求成功之后调用
+                var data = dat['data']
+                timeend = data['timeend'];
+                newdata = data['data'];
+                //console.log(typeof (indata[0][0]))
+                ch_names = data['ch_names'];
+                refresh();
+            }
+        })
+    }
+
+//    var base_host = "/"
+    function page2Valid() {
+        //return true
+        var selected = $(".selected-channels").val();
+        var channels = selected.split(",")
+        var valid_chans = ['FP1','FPZ','FP2','AF3','AF4','F7','F5','F3','F1','FZ','F2','F4','F6','F8','FT7','FC5','FC3','FC1','FCZ','FC2','FC4','FC6','FT8','T7','C5','C3','C1','CZ','C2','C4','C6','T8','M1','TP7','CP5','CP3','CP1','CPZ','CP2','CP4','CP6','TP8','M2','P7','P5','P3','P1','PZ','P2','P4','P6','P8','PO7','PO5','PO3','POZ','PO4','PO6','PO8','CB1','O1','OZ','O2','CB2']
+        var right_chan = 'valid'
+        for (var i=0; i<channels.length; i++) {
+            if (valid_chans.indexOf(channels[i]) == -1) {
+                right_chan = channels[i]
+                layer.msg(right_chan + "通道不存在")
+                return false
+            }
+        }
+
+        var down_samples = $(".selected-samples").val();
+        if (!(/(^[1-9]\d*$)/.test(down_samples))) {
+            layer.msg("请输入正确的降采样数")
+            return false
+        }
+        var selected_filter = $(".selected-filter").val()
+        var low = 0
+        var high = 0
+        if ($.trim(selected_filter)!="") {
+            low = selected_filter.split("-")[0]
+            high = selected_filter.split("-")[1]
+            if (!(/(^[1-9]\d*$)/.test(low)) || !(/(^[1-9]\d*$)/.test(high))) {
+                layer.msg("请输入正确的滤波方式")
+                return false
+            } else {
+                low = parseInt(low);
+                high = parseInt(high);
+                if (low >= high) {
+                    layer.msg("请输入正确的滤波方式")
+                    return false
+                }
+            }
+        }
+        var data_aug = $(".select-aug").val();
+        var save_mat = $('#is_save_mat').prop('checked');
+        var code = 0
+        httpRequest(base_host+"api/createFilter",
+            {"low":low, "high": high, "sampleRate": down_samples, "channels": JSON.stringify(channels),"dataAug":data_aug, "dataSave": save_mat},
+            'GET', function () {code = 1}, false
+        )
+        if (code == 1) return true
+        return false
+    }
+    function page1Valid() {
+        //return true
+        var param1 = $(".param1").val()
+        var param2 = $(".param2").val()
+        var param3 = $(".param3").val()
+        var param4 = $(".param4").val()
+        var param5 = $(".param5").val()
+        var param6 = $(".param6").val()
+        if (!(/(^[1-9]\d*$)/.test(param1))) {
+            layer.msg("请输入正确的实验次数")
+        } else if (!(/(^[1-9]\d*$)/.test(param2))) {
+            layer.msg("请输入正确的单个实验试次数量")
+        } else if (!(/(^[1-9]\d*$)/.test(param3))) {
+            layer.msg("请输入正确的实验休息间隔")
+        } else if (!(/(^[1-9]\d*$)/.test(param4))) {
+            layer.msg("请输入正确的试次开始时间")
+        } else if (!(/(^[1-9]\d*$)/.test(param5))) {
+            layer.msg("请输入正确的有效数据长度")
+        } else if (!(/(^[1-9]\d*$)/.test(param6))) {
+            layer.msg("请输入正确的数据间隔步长")
+        } else {
+            var code = 0
+            httpRequest(base_host+"api/createExperiment",
+                {"sessions":param1, "trials": param2, "interval": param3, "duration": param6, "tmin": param4, "tmax": param5, "device":1},
+                'GET', function () {code = 1}, false
+            )
+            if (code == 1) return true
+        }
+        return false
+    }
+    
+    function console_item(time, fos, answer, acc) {
+        setTimeout(function () {
+            $(".console-body").append("<span>2020-12-18 10:26:23,792[ParseData]: INFO: 第"+fos+"条样本预测："+answer+"，当前准确率"+acc+"%</span>")
+            $(".console-body").animate({scrollTop:$(".console-body").prop("scrollHeight")}, 400);//0.4秒内滚到底部
+        }, time)
+    }
+    function augment_resize() {
+        $(".aug-box").html("<div class=\"input-group aug-text\" style=\"width:300px;\">"+
+            "<select data-placeholder=\"选择数据增强方式\" class=\"chosen-select pull-right select-aug\" multiple style=\"width:100%;\">"+
+            "<option value=\"高斯噪声\">高斯噪声</option><option value=\"数据翻转\">数据翻转</option><option value=\"窗口滑动5%\">窗口滑动5%</option>"+
+            "<option value=\"其他\">其他</option></select></div>")
+        $(".aug-text").css("width",$(".resize-aug").width());
+        $(".chosen-select").chosen({});
+    }
+    $(document).ready(function () {
+        // 数据增强改变大小
+        augment_resize()
+        $(".icon-container").css("padding-left", ($('html').width() * 0.06 - 50)/2)
+        $(window).resize(function(){
+            augment_resize()
+            $(".icon-container").css("padding-left", ($('html').width() * 0.06 - 50)/2)
+        });
+
+        $('.i-checks').iCheck({
+            checkboxClass: 'icheckbox_square-green',
+            radioClass: 'iradio_square-green',
+        });
+        $(".step1").click(function () {
+            if (page1Valid() == true) {
+                if ($(".aug-text").width() < 100) {
+                    augment_resize()
+                }
+                $("#form1").animate({left: '-150px', opacity: '0'});
+                $("#form2").animate({left: '9%', opacity: '1'});
+                $("#form2").css({'display': 'block'})
+                setTimeout(function () {
+                    $("#form1").css({'display': 'none'})
+                }, 300)
+            }
+        })
+        $(".step2").click(function () {
+            $("#form1").animate({left:'9%', opacity: '1'});
+            $("#form2").animate({left:'150px', opacity:'0'});
+            $("#form1").css({'display': 'block'})
+            setTimeout(function () {
+                $("#form2").css({'display': 'none'})
+            }, 300)
+        })
+        $(".step3").click(function () {
+            if (page2Valid() == true ) {
+                $("#form2").animate({left: '-150px', opacity: '0'});
+                $("#form3").animate({left: '7%', opacity: '1'});
+                $("#form3").css({'display': 'block'})
+                setTimeout(function () {
+                    $("#form2").css({'display': 'none'})
+                }, 300)
+            }
+        })
+
+        $(".step4").click(function () {
+            $("#form2").animate({left:'9%', opacity: '1'});
+            $("#form3").animate({left:'150px', opacity:'0'});
+            $("#form2").css({'display': 'block'})
+            setTimeout(function () {
+                $("#form3").css({'display': 'none'})
+            }, 300)
+            if ($(".aug-text").width()<100) {
+                augment_resize()
+            }
+        })
+        $(".step5").click(function () {
+            $("#form3").animate({left: '-150px', opacity: '0'});
+            setTimeout(function () {
+                $("#form3").css({'display': 'none'})
+                $(".canvas-eeg").fadeIn(100)
+            }, 300)
+            //return true
+            httpRequest(base_host+"api/createClassfier", {},
+                'GET', function () {
+                    layer.msg("模型构建中...")
+                }, false
+            )
+        })
+        $("#form2").css({'display': 'none'})
+        $("#form3").css({'display': 'none'})
+        $(".canvas-eeg").css({'display': 'none'})
+
+        $(".choose-filter").click(function () {
+            fil_msg = $(this).text()
+            $(".selected-filter").val(fil_msg.substr(0, fil_msg.length - 6))
+        });
+
+
+
+        $(".icon-run").click(function () {
+            var sum = 0;
+            loopId = setInterval(getdata, 400);
+            for (var i=1; i<=120; i++) {
+                var res = Math.floor(Math.random()*10)
+                var ans = "错误"
+                if (res > 1) {
+                    sum += 1
+                    ans = "正确"
+                }
+                var accu = parseInt(sum*100 / i)
+                console_item(i*1000, i, ans, accu)
+            }
+        })
+    });
+
+</script>
+</body>
+</html>
