@@ -338,6 +338,24 @@
     var indata = Array.from({length:64},x=>Array.from({length:200}, y=>0));
     var newdata = [];
     var timeend = -1;
+    function getCurrentTime() {
+        var now = new Date();
+        var year = now.getFullYear(); //得到年份
+        var month = now.getMonth();//得到月份
+        var date = now.getDate();//得到日期
+        var day = now.getDay();//得到周几
+        var hour = now.getHours();//得到小时
+        var minu = now.getMinutes();//得到分钟
+        var sec = now.getSeconds();//得到秒
+        month = month + 1;
+        if (month < 10) month = "0" + month;
+        if (date < 10) date = "0" + date;
+        if (hour < 10) hour = "0" + hour;
+        if (minu < 10) minu = "0" + minu;
+        if (sec < 10) sec = "0" + sec;
+        var time = year + "-" + month + "-" + date+ " " + hour + ":" + minu + ":" + sec;
+        return time;
+    }
     function refresh() {
         var grids = [];
         var xAxes = [];
@@ -490,10 +508,15 @@
         }
         return false
     }
+
+    function console_log(msg) {
+        $(".console-body").append("<span>2020-12-18 10:26:23,792[ParseData]: INFO: "+msg+"</span>")
+        $(".console-body").animate({scrollTop:$(".console-body").prop("scrollHeight")}, 400);//0.4秒内滚到底部
+    }
     
     function console_item(time, fos, answer, acc) {
         setTimeout(function () {
-            $(".console-body").append("<span>2020-12-18 10:26:23,792[ParseData]: INFO: 第"+fos+"条样本预测："+answer+"，当前准确率"+acc+"%</span>")
+            $(".console-body").append("<span>"+getCurrentTime()+"[server]: INFO: 第"+fos+"条样本预测："+answer+"，当前准确率"+acc+"%</span>")
             $(".console-body").animate({scrollTop:$(".console-body").prop("scrollHeight")}, 400);//0.4秒内滚到底部
         }, time)
     }
@@ -562,15 +585,21 @@
             }
         })
         $(".step5").click(function () {
-            $("#form3").animate({left: '-150px', opacity: '0'});
-            setTimeout(function () {
-                $("#form3").css({'display': 'none'})
-                $(".canvas-eeg").fadeIn(100)
-            }, 300)
             //return true
             httpRequest(base_host+"api/createClassfier", {},
-                'GET', function () {
-                    layer.msg("模型构建中...")
+                'GET', function (data) {
+                    data = JSON.parse(data)
+                    if (data.code == "0") {
+                        $("#form3").animate({left: '-150px', opacity: '0'});
+                        setTimeout(function () {
+                            $("#form3").css({'display': 'none'})
+                            $(".canvas-eeg").fadeIn(100)
+                        }, 300)
+                        layer.msg("模型构建中...")
+                    } else {
+                        layer.msg("模型构建失败，请查看错误日志");
+                        console_log(data.data)
+                    }
                 }, false
             )
         })
@@ -582,7 +611,6 @@
             fil_msg = $(this).text()
             $(".selected-filter").val(fil_msg.substr(0, fil_msg.length - 6))
         });
-
 
 
         $(".icon-run").click(function () {
