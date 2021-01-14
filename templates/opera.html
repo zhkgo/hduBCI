@@ -586,22 +586,33 @@
         })
         $(".step5").click(function () {
             //return true
-            httpRequest(base_host+"api/createClassfier", {},
+            httpRequest(base_host+"api/createTcp", {},
                 'GET', function (data) {
                     data = JSON.parse(data)
-                    if (data.code == "0") {
-                        $("#form3").animate({left: '-150px', opacity: '0'});
-                        setTimeout(function () {
-                            $("#form3").css({'display': 'none'})
-                            $(".canvas-eeg").fadeIn(100)
-                        }, 300)
-                        layer.msg("模型构建中...")
+                    if (data.code == "0") {   //开始构建模型
+                        httpRequest(base_host+"api/createClassfier", {},
+                            'GET', function (data) {
+                                data = JSON.parse(data)
+                                if (data.code == "0") {
+                                    $("#form3").animate({left: '-150px', opacity: '0'});
+                                    setTimeout(function () {
+                                        $("#form3").css({'display': 'none'})
+                                        $(".canvas-eeg").fadeIn(100)
+                                    }, 300)
+                                    layer.msg("模型构建中...")
+                                } else {
+                                    layer.msg("模型构建失败，请查看错误日志");
+                                    console_log(data.data)
+                                }
+                            }, false
+                        )
                     } else {
-                        layer.msg("模型构建失败，请查看错误日志");
+                        layer.msg("TCP连接失败，请检查Neuroscan是否已经打开");
                         console_log(data.data)
                     }
                 }, false
             )
+
         })
         $("#form2").css({'display': 'none'})
         $("#form3").css({'display': 'none'})
