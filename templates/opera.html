@@ -492,7 +492,7 @@
             layer.msg("请输入正确的单个实验试次数量")
         } else if (!(/(^[1-9]\d*$)/.test(param3))) {
             layer.msg("请输入正确的实验休息间隔")
-        } else if (!(/(^[1-9]\d*$)/.test(param4))) {
+        } else if ($.trim(param4)!="0"&&!(/(^[1-9]\d*$)/.test(param4))) {
             layer.msg("请输入正确的试次开始时间")
         } else if (!(/(^[1-9]\d*$)/.test(param5))) {
             layer.msg("请输入正确的有效数据长度")
@@ -501,7 +501,7 @@
         } else {
             var code = 0
             httpRequest(base_host+"api/createExperiment",
-                {"sessions":param1, "trials": param2, "interval": param3, "duration": param6, "tmin": param4, "tmax": param5, "device":1},
+                {"sessions":param1, "trials": param2, "interval": param3, "duration": param6, "tmin": param4, "tmax": (parseInt(param4)+parseInt(param5)), "device":1},
                 'GET', function () {code = 1}, false
             )
             if (code == 1) return true
@@ -589,30 +589,39 @@
             httpRequest(base_host+"api/createTcp", {},
                 'GET', function (data) {
                     data = JSON.parse(data)
-                    if (data.code == "0") {   //开始构建模型
-                        httpRequest(base_host+"api/createClassfier", {},
-                            'GET', function (data) {
-                                data = JSON.parse(data)
-                                if (data.code == "0") {
-                                    $("#form3").animate({left: '-150px', opacity: '0'});
-                                    setTimeout(function () {
-                                        $("#form3").css({'display': 'none'})
-                                        $(".canvas-eeg").fadeIn(100)
-                                    }, 300)
-                                    layer.msg("模型构建中...")
-                                } else {
-                                    layer.msg("模型构建失败，请查看错误日志");
-                                    console_log(data.data)
-                                }
-                            }, false
-                        )
-                    } else {
+                    if (data.code != "0") {   //开始构建模型
                         layer.msg("TCP连接失败，请检查Neuroscan是否已经打开");
+                        console_log(data.data)
+                        return
+                    }
+                }, false
+            )
+            httpRequest(base_host+"api/startTcp", {},
+                'GET', function (data) {
+                    data = JSON.parse(data)
+                    if (data.code != "0") {   //开始构建模型
+                        layer.msg("TCP开始失败，请查看控制台错误信息");
+                        console_log(data.data)
+                        return
+                    }
+                }, false
+            )
+            httpRequest(base_host+"api/createClassfier", {},
+                'GET', function (data) {
+                    data = JSON.parse(data)
+                    if (data.code == "0") {
+                        $("#form3").animate({left: '-150px', opacity: '0'});
+                        setTimeout(function () {
+                            $("#form3").css({'display': 'none'})
+                            $(".canvas-eeg").fadeIn(100)
+                        }, 300)
+                        layer.msg("模型构建中...")
+                    } else {
+                        layer.msg("模型构建失败，请查看错误日志");
                         console_log(data.data)
                     }
                 }, false
             )
-
         })
         $("#form2").css({'display': 'none'})
         $("#form3").css({'display': 'none'})
