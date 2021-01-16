@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <title>在线测试</title>
     <script src="./js/jquery-plugins.js"></script>
-<!--    <script src="./js/bootstrap.js"></script>-->
-
-<!--    <link href="./css/bootstrap.css" rel="stylesheet" />-->
     <link href="./css/bootstrap-3.3.4.css" rel="stylesheet"/>
     <link href="./css/uploadifive.css" rel="stylesheet" />
     <link href="./css/online.css" rel="stylesheet"/>
@@ -15,8 +12,6 @@
     <link href="./css/animate.css" rel="stylesheet">
     <link href="./css/style_form.css" rel="stylesheet">
     <link href="./css/plugins/iCheck/custom.css" rel="stylesheet">
-<!--    <link href="./css/plugins/dropzone/basic.css" rel="stylesheet">-->
-<!--    <link href="./css/plugins/dropzone/dropzone.css" rel="stylesheet">-->
     <link href="./css/plugins/chosen/chosen.css" rel="stylesheet">
     <link href="./css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
     <link/>
@@ -96,6 +91,7 @@
             position: absolute;
             opacity: 0;
             padding: 32px;
+            display: none;
         }
 
         #form3 {
@@ -105,6 +101,7 @@
             position: absolute;
             opacity: 0;
             padding: 32px;
+            display: none;
         }
         h2 {
             font-family: "微软雅黑";
@@ -143,11 +140,23 @@
         }
 
         .canvas-eeg {
-            width: 637px;
+            width: 500px;
             height: 700px;
             overflow-y: scroll;
             float: left;
             background-color: rgb(252,252,253);
+            display: none;
+            {#background-color: rgb(252,0,0);#}
+        }
+
+        .adjust-value {
+            width: 40%;
+            min-height: 70px;
+            margin-left: 7%;
+            height: auto !important;
+            float: left;
+            position: relative;
+            display: none;
         }
     </style>
 </head>
@@ -162,32 +171,32 @@
         <div class="hr-line-dashed"></div>
         <div class="form-group">
             <label class="col-sm-4 control-label">实验总次数</label>
-            <div class="col-sm-7"><input type="text" class="form-control param1"></div>
+            <div class="col-sm-7"><input type="text" value="10" class="form-control param1"></div>
             <label class="col-sm-1 control-label">次</label>
         </div>
         <div class="hr-line-dashed"></div>
         <div class="form-group"><label class="col-sm-4 control-label">单个实验试次数</label>
-            <div class="col-sm-7"><input type="text" class="form-control param2"></div>
+            <div class="col-sm-7"><input type="text" value="50" class="form-control param2"></div>
             <label class="col-sm-1 control-label">次</label>
         </div>
         <div class="hr-line-dashed"></div>
         <div class="form-group"><label class="col-sm-4 control-label">实验休息间隔</label>
-            <div class="col-sm-7"><input type="text" class="form-control param3"></div>
+            <div class="col-sm-7"><input type="text" value="20000" class="form-control param3"></div>
             <label class="col-sm-1 control-label">ms</label>
         </div>
         <div class="hr-line-dashed"></div>
         <div class="form-group"><label class="col-sm-4 control-label">试次开始时间</label>
-            <div class="col-sm-7"><input type="text" class="form-control param4"></div>
+            <div class="col-sm-7"><input type="text" value="0" class="form-control param4"></div>
             <label class="col-sm-1 control-label">ms</label>
         </div>
         <div class="hr-line-dashed"></div>
         <div class="form-group"><label class="col-sm-4 control-label">有效数据长度</label>
-            <div class="col-sm-7"><input type="text" class="form-control param5"></div>
+            <div class="col-sm-7"><input type="text" value="1000" class="form-control param5"></div>
             <label class="col-sm-1 control-label">ms</label>
         </div>
         <div class="hr-line-dashed"></div>
         <div class="form-group"><label class="col-sm-4 control-label">数据间隔步长</label>
-            <div class="col-sm-7"><input type="text" class="form-control param6"></div>
+            <div class="col-sm-7"><input type="text" value="1000" class="form-control param6"></div>
             <label class="col-sm-1 control-label">ms</label>
         </div>
         <div class="hr-line-dashed"></div>
@@ -203,17 +212,17 @@
         <h2>预处理选择</h2>
         <div class="hr-line-dashed"></div>
         <div class="form-group"><label class="col-sm-4 control-label">预训练试次数</label>
-            <div class="col-sm-7"><input type="text" class="form-control pre-num"></div>
+            <div class="col-sm-7"><input type="text" value="1" class="form-control pre-num"></div>
             <label class="col-sm-1 control-label">次</label>
         </div>
         <div class="hr-line-dashed"></div>
         <div class="form-group"><label class="col-sm-4 control-label">通道选择</label>
-            <div class="col-sm-7"><input type="text" class="form-control selected-channels" placeholder="用英文逗号隔开，例如C3,C4,Cz"></div>
+            <div class="col-sm-7"><input type="text" value="FZ,FC1,FC2,C3,CZ,C4,CP1,CP2,P7,P3,PZ,P4,P8,O1,OZ,O2" class="form-control selected-channels" placeholder="用英文逗号隔开，例如C3,C4,Cz"></div>
         </div>
         <div class="hr-line-dashed"></div>
         <div class="form-group">
             <label class="col-sm-4 control-label">降采样率</label>
-            <div class="col-sm-7 resize-aug"><input type="text" class="form-control selected-samples" placeholder="1000Hz表示不进行降采样" value="1000">
+            <div class="col-sm-7 resize-aug"><input type="text" class="form-control selected-samples" placeholder="1000Hz表示不进行降采样" value="250">
             </div>
             <label class="col-sm-1 control-label">Hz</label>
         </div>
@@ -235,7 +244,7 @@
                             <li><a href="javascript:;" class="choose-filter">0.1-100Hz带通滤波</a></li>
                         </ul>
                     </div>
-                    <input type="text" class="form-control selected-filter" placeholder="输入例如:7-20">
+                    <input type="text" class="form-control selected-filter" value="1-40" placeholder="输入例如:7-20">
                 </div>
             </div>
             <label class="col-sm-1 control-label">Hz</label>
@@ -317,6 +326,11 @@
     <div class="console-body">
     </div>
 </div>
+<div class="adjust-value">
+    <input value="+" type="button" class="btn btn-default" onclick="addValue()"/>
+    <input value="-" type="button" class="btn btn-default" onclick="subValue()"/>
+    <span class="nowValue">50</span>
+</div>
 <script src="./js/jquery.uploadifive.js"></script>
 <script type="text/javascript" src="./echarts/echarts.min.js"></script>
 <script type="text/javascript" src="./echarts/echarts-gl.min.js"></script>
@@ -330,14 +344,36 @@
 <!--<script src="./js/plugins/dropzone/dropzone.js"></script>-->
 <script src="./js/plugins/iCheck/icheck.min.js"></script>
 <script>
+    ws = null
+    function ws_conn() {
+        var ws_url = "ws://localhost:10086/ws/startExperiment"
+        ws = new WebSocket(ws_url)
+        ws.onmessage=function (serv_msg) {
+            console.log("test:" + serv_msg.data)
+        }
+        ws.onopen=function (msg) {
+            console.log(JSON.stringify(msg))
+        }
+    }
 //    var base_host = "http://192.168.149.212:10086/"
     var base_host = "http://localhost:10086/";
     var dom = document.getElementById("container");
     var myChart = echarts.init(dom);
     option = null;
-    var indata = Array.from({length:64},x=>Array.from({length:200}, y=>0));
+    var showLength = 1000
+    var nowFos = 0
+    var indata = Array.from({length:16},x=>Array.from({length:showLength}, y=>0));
     var newdata = [];
     var timeend = -1;
+    value = 50
+    function addValue() {
+        value = value * 2
+        $(".nowValue").text(value)
+    }
+    function subValue() {
+        value = value / 2
+        $(".nowValue").text(value)
+    }
     function getCurrentTime() {
         var now = new Date();
         var year = now.getFullYear(); //得到年份
@@ -363,10 +399,18 @@
         var series = [];
         var titles = [];
         var count = 0;
+        var end_Fos = 0
         echarts.util.each(indata, function (line) {
-            length = newdata[count].length;
-            line = line.slice(length);
-            line = line.concat(newdata[count]);   // 连接到最后一段
+            var length = newdata[count].length;   //新的数据
+            var i_mod = 0
+            for (var i=nowFos; i<nowFos + length; i++) {
+                i_mod = i % showLength
+                line[i_mod] = newdata[count][i-nowFos]
+            }
+            end_Fos = (nowFos + length) % 1000
+            //console.log("结束位置："+end_Fos)
+            //line = line.slice(length);
+            //line = line.concat(newdata[count]);   // 连接到最后一段
             indata[count] = line;
             grids.push({
                 show: true, borderWidth: 0, backgroundColor: 'rgb(252,252,252)'
@@ -376,7 +420,7 @@
             });
             yAxes.push({
                 type: 'value', show: false,
-                min: -500, max: 500, gridIndex: count
+                min: -value, max: value, gridIndex: count
             });
             series.push({
                 name: '',
@@ -394,7 +438,7 @@
             });
             count++;
         });
-        console.log(new Date().getTime())
+        nowFos = end_Fos
         var lineheight = Math.ceil(100 / count) + '%';
         echarts.util.each(grids, function (grid, idx) {
             grid.left = '0%';
@@ -410,22 +454,30 @@
         }
     }
     function getdata() {
-        $.ajax({
-            url: base_host + "api/getdata", //请求地址
-            type: "get", //请求方式
-            data: {'timeend': timeend}, dataType: "json", //这里的data:发送给服务器的请求数据
-            success: function (dat) { //回调函数：数据请求成功之后调用
-                var data = dat['data']
-                timeend = data['timeend'];
-                newdata = data['data'];
-                //console.log(typeof (indata[0][0]))
-                ch_names = data['ch_names'];
-                refresh();
-            }
-        })
+        httpRequest(base_host + "api/getdata",{'timeend': timeend},'get', function (dat) {
+            dat = JSON.parse(dat)
+            var data = dat['data']
+            timeend = data['timeend'];
+            newdata = data['data'];
+            //console.log(typeof (indata[0][0]))#
+            ch_names = data['ch_names'];
+            var nowTime = timeend
+            refresh();
+        }, true )
+      //  $.ajax({
+      //      url: base_host + "api/getdata", //请求地址
+        //    type: "get", //请求方式
+          //  data: {'timeend': timeend}, dataType: "json", //这里的data:发送给服务器的请求数据
+           // success: function (dat) { //回调函数：数据请求成功之后调用
+            //    var data = dat['data']
+             //   timeend = data['timeend'];
+             //   newdata = data['data'];
+              //  //console.log(typeof (indata[0][0]))#
+               // ch_names = data['ch_names'];
+                //refresh();
+           // }
+       // })
     }
-
-//    var base_host = "/"
     function page2Valid() {
         //return true
         var pre_num = $(".pre-num").val();
@@ -492,7 +544,7 @@
             layer.msg("请输入正确的单个实验试次数量")
         } else if (!(/(^[1-9]\d*$)/.test(param3))) {
             layer.msg("请输入正确的实验休息间隔")
-        } else if ($.trim(param4)!="0"&&!(/(^[1-9]\d*$)/.test(param4))) {
+        } else if ($.trim(param4)!=0 && !(/(^[1-9]\d*$)/.test(param4))) {
             layer.msg("请输入正确的试次开始时间")
         } else if (!(/(^[1-9]\d*$)/.test(param5))) {
             layer.msg("请输入正确的有效数据长度")
@@ -501,19 +553,17 @@
         } else {
             var code = 0
             httpRequest(base_host+"api/createExperiment",
-                {"sessions":param1, "trials": param2, "interval": param3, "duration": param6, "tmin": param4, "tmax": (parseInt(param4)+parseInt(param5)), "device":1},
+                {"sessions":param1, "trials": param2, "interval": param3, "duration": param6, "tmin": param4, "tmax": (parseInt(param4) + parseInt(param5)), "device":1},
                 'GET', function () {code = 1}, false
             )
             if (code == 1) return true
         }
         return false
     }
-
     function console_log(msg) {
         $(".console-body").append("<span>2020-12-18 10:26:23,792[ParseData]: INFO: "+msg+"</span>")
         $(".console-body").animate({scrollTop:$(".console-body").prop("scrollHeight")}, 400);//0.4秒内滚到底部
     }
-    
     function console_item(time, fos, answer, acc) {
         setTimeout(function () {
             $(".console-body").append("<span>"+getCurrentTime()+"[server]: INFO: 第"+fos+"条样本预测："+answer+"，当前准确率"+acc+"%</span>")
@@ -532,26 +582,35 @@
         // 数据增强改变大小
         augment_resize()
         $(".icon-container").css("padding-left", ($('html').width() * 0.06 - 50)/2)
+        $(".canvas-eeg").css({"width":$('html').width() * 0.4})
         $(window).resize(function(){
             augment_resize()
+            $(".canvas-eeg").css({"width":$('html').width() * 0.4})
             $(".icon-container").css("padding-left", ($('html').width() * 0.06 - 50)/2)
         });
-
         $('.i-checks').iCheck({
             checkboxClass: 'icheckbox_square-green',
             radioClass: 'iradio_square-green',
         });
         $(".step1").click(function () {
             if (page1Valid() == true) {
-                if ($(".aug-text").width() < 100) {
-                    augment_resize()
-                }
                 $("#form1").animate({left: '-150px', opacity: '0'});
                 $("#form2").animate({left: '9%', opacity: '1'});
                 $("#form2").css({'display': 'block'})
                 setTimeout(function () {
                     $("#form1").css({'display': 'none'})
                 }, 300)
+                augment_resize()
+                httpRequest(base_host+"api/createTcp", {},
+                'GET', function (data) {
+                    data = JSON.parse(data)
+                    if (data.code != "0") {
+                        layer.msg("TCP连接失败，请检查Neuroscan是否已经打开");
+                        console_log(data.data)
+                        return
+                    }
+                }, false
+            )
             }
         })
         $(".step2").click(function () {
@@ -572,7 +631,6 @@
                 }, 300)
             }
         })
-
         $(".step4").click(function () {
             $("#form2").animate({left:'9%', opacity: '1'});
             $("#form3").animate({left:'150px', opacity:'0'});
@@ -580,27 +638,15 @@
             setTimeout(function () {
                 $("#form3").css({'display': 'none'})
             }, 300)
-            if ($(".aug-text").width()<100) {
-                augment_resize()
-            }
+            augment_resize()
         })
         $(".step5").click(function () {
             //return true
-            httpRequest(base_host+"api/createTcp", {},
-                'GET', function (data) {
-                    data = JSON.parse(data)
-                    if (data.code != "0") {   //开始构建模型
-                        layer.msg("TCP连接失败，请检查Neuroscan是否已经打开");
-                        console_log(data.data)
-                        return
-                    }
-                }, false
-            )
             httpRequest(base_host+"api/startTcp", {},
                 'GET', function (data) {
                     data = JSON.parse(data)
-                    if (data.code != "0") {   //开始构建模型
-                        layer.msg("TCP开始失败，请查看控制台错误信息");
+                    if (data.code != "0") {
+                        layer.msg("TCP开始失败，请查看控制台输出");
                         console_log(data.data)
                         return
                     }
@@ -614,38 +660,35 @@
                         setTimeout(function () {
                             $("#form3").css({'display': 'none'})
                             $(".canvas-eeg").fadeIn(100)
+                            $(".adjust-value").fadeIn(100)
                         }, 300)
                         layer.msg("模型构建中...")
                     } else {
                         layer.msg("模型构建失败，请查看错误日志");
                         console_log(data.data)
+                        return
                     }
                 }, false
             )
         })
-        $("#form2").css({'display': 'none'})
-        $("#form3").css({'display': 'none'})
-        $(".canvas-eeg").css({'display': 'none'})
-
         $(".choose-filter").click(function () {
             fil_msg = $(this).text()
             $(".selected-filter").val(fil_msg.substr(0, fil_msg.length - 6))
         });
-
-
         $(".icon-run").click(function () {
+            //ws_conn();
             var sum = 0;
-            loopId = setInterval(getdata, 400);
-            for (var i=1; i<=120; i++) {
-                var res = Math.floor(Math.random()*10)
-                var ans = "错误"
-                if (res > 1) {
-                    sum += 1
-                    ans = "正确"
-                }
-                var accu = parseInt(sum*100 / i)
-                console_item(i*1000, i, ans, accu)
-            }
+            loopId = setInterval(getdata, 500);
+            //for (var i=1; i<=120; i++) {
+            //    var res = Math.floor(Math.random()*10)
+            //    var ans = "错误"
+            //    if (res > 1) {
+            //        sum += 1
+            //        ans = "正确"
+            //    }
+            //    var accu = parseInt(sum*100 / i)
+            //    console_item(i*1000, i, ans, accu)
+            //}
         })
     });
 

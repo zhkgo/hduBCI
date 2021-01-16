@@ -9,9 +9,9 @@ import threading
 from scipy.io import savemat
 import scipy.io as scio
 
-class DataAcquire(Thread):
-    def __init__(self, name, host="127.0.0.1", port=4000, save_data=True, save_len=900000):  # 可以通过初始化来传递参数
-        super(DataAcquire, self).__init__()
+class TCPParser:
+    def __init__(self, name="neuroscan", host="127.0.0.1", port=4000, save_data=True, save_len=450000):  # 可以通过初始化来传递参数
+        super(TCPParser, self).__init__()
         self.tcp_status = False    # Tcp是否连接
         self.data_status = False   # Neuroscan是否有数据传输
         self.buffer_ing = False    # 是否创建了buffer
@@ -39,7 +39,7 @@ class DataAcquire(Thread):
         self.global_events = np.zeros((self.half_save * 2)).astype(np.float32)
         self.event_chan = 41   # 事件通道
         self.save_fos = 1   # 文件保存的命名
-        self.buffer_fos = 0
+        self.end = 0
         self.channel_names = ['FP1', 'FPZ', 'FP2', 'AF3', 'AF4', 'F7', 'F5', 'F3', 'F1', 'FZ', 'F2', 'F4', 'F6', 'F8',
                               'FT7', 'FC5', 'FC3', 'FC1', 'FCZ', 'FC2', 'FC4', 'FC6', 'FT8', 'T7', 'C5', 'C3', 'C1',
                               'CZ', 'C2', 'C4', 'C6', 'T8', 'M1', 'TP7', 'CP5', 'CP3', 'CP1', 'CPZ', 'CP2', 'CP4', 'CP6',
@@ -55,7 +55,7 @@ class DataAcquire(Thread):
         self.half_save = len  # 重新设定buffer长度并初始化
         self.global_buffer = np.zeros((self.half_save * 2, 68)).astype(np.float32)
         self.global_events = np.zeros((self.half_save * 2, 1)).astype(np.float32)
-        self.buffer_fos = 0
+        self.end = 0
         self.save_fos = 1
 
     def get_channels_name(self):
@@ -101,7 +101,7 @@ class DataAcquire(Thread):
         self.tcp_status = False
         self.data_status = False
         self.buffer_ing = False
-        self.buffer_fos = 0
+        self.end = 0
         self.save_fos = 1
         self.soc = socket.socket()
         self.connect_server()
@@ -133,15 +133,18 @@ class DataAcquire(Thread):
         self.parse_basic_info(recv_data)
         self.tcp_status = True
 
-    def create_batch(self):
-        if self.tcp_status is False:
-            print("TCP 尚未建立连接，Buffer建立失败！")
-            return False
-        if self.data_status is False:
-            print("Neuroscan 尚未开始采集数据，请点击Neuroscan数据采集按钮，并重新构建Buffer！")
-            return False
-        print(f"开始创建Buffer ...")
-        self.buffer_ing = True
+    def create_batch(self,chnames):
+        pass
+
+    # def startTcp(self):
+    #     if self.tcp_status is False:
+    #         print("TCP 尚未建立连接，Buffer建立失败！")
+    #         return False
+    #     if self.data_status is False:
+    #         print("Neuroscan 尚未开始采集数据，请点击Neuroscan数据采集按钮，并重新构建Buffer！")
+    #         return False
+    #     print(f"开始创建Buffer ...")
+    #     self.buffer_ing = True
 
     def parse_data(self):
         iter_num = 1
@@ -175,6 +178,10 @@ class DataAcquire(Thread):
                     return
             else: pass
             debug_num += 1
+            # 取消create_batch
+            if debug_num == 11:
+                self.buffer_ing = True
+                break
 
         if debug_num % 2 == 0:   # 额外处理头部，从第一个非0的数据部开始处理，再之前会出现前半部分为0的情况
             iter_num = 3
@@ -185,10 +192,11 @@ class DataAcquire(Thread):
             events = neuro_data[:, self.event_chan]
             neuro_data = np.delete(neuro_data, self.event_chan, axis=1)
             target_mat = neuro_data * self.resolution
-            self.global_buffer[self.buffer_fos: self.buffer_fos + self.basic_samples, :] = target_mat[:, :64]
-            self.global_events[self.buffer_fos: self.buffer_fos + self.basic_samples] = events
-            self.buffer_fos += self.basic_samples
+            self.global_buffer[self.end: self.end + self.basic_samples, :] = target_mat[:, :64]
+            self.global_events[self.end: self.end + self.basic_samples] = events
+            self.end += self.basic_samples
 
+        print("开始存储数据，当前时间点：", time.time())
         while self.data_status:
             if iter_num % 2 == 1: recv_len = 12
             else: recv_len = self.data_len  # 固定的40ms的数据，69*40
@@ -214,32 +222,35 @@ class DataAcquire(Thread):
                 neuro_data = np.delete(neuro_data, self.event_chan, axis=1)
                 target_mat = neuro_data * self.resolution
                 # 数据buffer
-                self.global_buffer[self.buffer_fos: self.buffer_fos + self.basic_samples, :] = target_mat[:, :64]
+                self.global_buffer[self.end: self.end + self.basic_samples, :] = target_mat[:, :64]
                 # 事件buffer
-                self.global_events[self.buffer_fos: self.buffer_fos + self.basic_samples] = events
-                self.buffer_fos += self.basic_samples
+                self.global_events[self.end: self.end + self.basic_samples] = events
+                self.end += self.basic_samples
                 # mean_t = np.mean(target_mat[:, 39])
                 # if mean_t < 0: print("normal")
                 # else: print("test ")
-                if self.buffer_fos == self.half_save * 2:  # 循环队列到达末尾
-                    self.buffer_fos = 0
-                if self.buffer_fos == self.half_save or self.buffer_fos == 0:  # 保存前半段
+                if self.end == self.half_save * 2:  # 循环队列到达末尾
+                    self.end = 0
+                if self.end == self.half_save or self.end == 0:  # 保存前半段
                     sa = threading.Thread(target=self.save_mat, args=())
                     sa.start()
             iter_num += 1
 
-    def get_batch(self, start_fos, data_len):
-        eeg_data = self.global_buffer[start_fos:start_fos+data_len, :]
-        return eeg_data.T
+    def get_batch(self, start_fos, maxlength):
+        if start_fos <= -1:
+            start_fos = self.end - maxlength
+        rend = min(self.end, start_fos + maxlength)
+        eeg_data = self.global_buffer[start_fos:rend, :]
+        return eeg_data.T,int(rend)
 
     def get_buffer_fos(self):
-        return self.buffer_fos
+        return self.end
 
     # 由于使用了循环队列实现Buffer，因此无法在过程中主动保存，只能选择是否保存全部信号
     # 保存的信号按照编号保存到本地文件中
     def save_mat(self):
         print(f"开始保存第{self.save_fos}段数据至mat格式文件中...")
-        if self.buffer_fos == self.half_save:
+        if self.end == self.half_save:
             savemat(self.save_path + self.filename + '_'+str(self.save_fos)+'.mat',
                     {'dat': self.global_buffer[: self.half_save], 'event': self.global_events[: self.half_save]})
         else:
@@ -248,23 +259,24 @@ class DataAcquire(Thread):
         print(f"第{self.save_fos}段数据保存完成！")
         self.save_fos += 1
 
-    def run(self):
-        self.parse_data()
-
-if __name__ == '__main__':
-    thread_acquire = DataAcquire("NeuroScan")
-    thread_acquire.start()
-    time.sleep(8)
-    thread_acquire.create_batch()
-    time.sleep(4)
-    bfs = thread_acquire.get_buffer_fos()
-    print("经过4秒 游标已经到了：", bfs)
-    # eegs = thread_acquire.get_batch(38, 1000)
-    # chans = thread_acquire.get_channels_name()
-    # print(eegs.shape)
-    # for i in range(10, 14):
-    #     print(chans[i], " : ", eegs[i, 50:60])
-    # time.sleep(8)
-    # thread_acquire.close()
-
-
+#     def run(self):
+#         self.parse_data()
+#
+# if __name__ == '__main__':
+#     thread_acquire = TCPParser("NeuroScan")
+#     thread_acquire.start()
+#     time.sleep(8)
+#     # thread_acquire.create_batch()
+#     # time.sleep(4)
+#     bfs = thread_acquire.get_buffer_fos()
+#     print("经过8秒 游标已经到了：", bfs)
+#     time.sleep(3)
+#     bfs = thread_acquire.get_buffer_fos()
+#     print("经过11秒 游标已经到了：", bfs)
+#     # eegs = thread_acquire.get_batch(38, 1000)
+#     # chans = thread_acquire.get_channels_name()
+#     # print(eegs.shape)
+#     # for i in range(10, 14):
+#     #     print(chans[i], " : ", eegs[i, 50:60])
+#     # time.sleep(8)
+#     # thread_acquire.close()
