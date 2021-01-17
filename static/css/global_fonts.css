@@ -1,0 +1,37 @@
+@font-face {
+    font-family: 'SiYuanBold';
+    src: url('./fonts/5aacac8563dec245444ffbd2.gif');
+    src: url('./fonts/5aacac8563dec245444ffbd2.gif?#iefix') format('embedded-opentype'), url('./fonts/5aacac8563dec245444ffbd2.png') format('woff2'), url('./fonts/5aacac8563dec245444ffbd2.bmp') format('woff'), url('./fonts/5aacac8563dec245444ffbd2.jpg') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.youziku-c5a8f46018ec4cdfa827ba6989ffa10e {
+    font-family: 'SiYuanBold' !important
+}
+
+@font-face {
+    font-family: 'Source-Han-Light';
+    src: url('./fonts/5ac324ab63dec14e84a60cb9.gif');
+    src: url('./fonts/5ac324ab63dec14e84a60cb9.gif?#iefix') format('embedded-opentype'), url('./fonts/5ac324ab63dec14e84a60cb9.png') format('woff2'), url('./fonts/5ac324ab63dec14e84a60cb9.bmp') format('woff'), url('./fonts/5ac324ab63dec14e84a60cb9.jpg') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.youziku-e094346a5670469eaacd0dcc3afa6f0d {
+    font-family: 'Source-Han-Light' !important
+}
+
+@font-face {
+    font-family: 'Source-Han-Normal';
+    src: url('./fonts/5aab8c1363dec245444ffac6.gif');
+    src: url('./fonts/5aab8c1363dec245444ffac6.gif?#iefix') format('embedded-opentype'), url('./fonts/5aab8c1363dec245444ffac6.png') format('woff2'), url('./fonts/5aab8c1363dec245444ffac6.bmp') format('woff'), url('./fonts/5aab8c1363dec245444ffac6.jpg') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.youziku-48c15647d6414b1d865b2ee9b7d53df4 {
+    font-family: 'Source-Han-Normal' !important
+}
+
+

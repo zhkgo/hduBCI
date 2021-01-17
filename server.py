@@ -6,6 +6,7 @@ Created on Fri Nov  6 15:40:45 2020
 尚未开发完成
 wait for finish
 """
+# from flask_socketio import SocketIO, emit
 
 from werkzeug.utils import secure_filename
 from flask import request, Flask,render_template
@@ -13,29 +14,45 @@ from threading import Lock
 import threading
 from bcifilter import BciFilter
 from experiment import Experiment
-from parses.neuracleParse import TCPParser
+from parses.neuroscanParse import TCPParser
 from myresponse import success,fail
 import importlib
+from concurrent.futures import ThreadPoolExecutor
 from  gevent.pywsgi import WSGIServer
 # from  geventwebsocket.websocket import WebSocket,WebSocketError
 from  geventwebsocket.handler import WebSocketHandler
 import os
 import traceback
 from flask_cors import CORS
-app = Flask(__name__)
+import numpy as np
+app = Flask(__name__,static_url_path="")
 app.config['JSON_AS_ASCII'] = False
 app.debug = False # 设置调试模式，生产模式的时候要关掉debug
 CORS(app, supports_credentials=True)
 _thread=None #实验进行时的通讯线程
 lock=Lock()
 experiment = None
+
+
+def WithThread(obj):
+    """这是一个开启线程的装饰器"""
+    def Threads(*args):
+        t = threading.Thread(target=obj, args=args)
+        t.start()
+
+    return Threads
+
 @app.route('/datashow')
 def dataShow():
     return  render_template("dataShow.html")
 
 @app.route('/')
 def index():
-    return render_template("index.html")
+    return render_template("home.html")
+
+@app.route("/opera")
+def h2():
+    return render_template("opera.html")
 
 def backgroun_task(user_socket):
     global experiment
@@ -44,7 +61,8 @@ def backgroun_task(user_socket):
         if type(res) is str:
             break
         user_socket.send(success(res))
-        
+
+
 @app.route('/ws/startExperiment')
 def startExperiment():
     global experiment,_thread
@@ -56,11 +74,9 @@ def startExperiment():
         print("实验开始")
         with lock:
             if _thread is None:
-                _thread =threading.Thread(target=backgroun_task,args=(user_socket,))
+                _thread = threading.Thread(target=backgroun_task,args=(user_socket,))
                 _thread.start()
-                _thread.join()
-        _thread=None
-        return success("实验结束")
+                # _thread.join()
     except Exception as e:
         traceback.print_exc()
         return fail(str(e))
@@ -114,9 +130,9 @@ def createTcp():
     if experiment==None:
         return fail("请先创建实验")
     try:
-        tcp=TCPParser('localhost', 8712)
+        tcp=TCPParser(host='localhost', port=4000)
         ch_nums=experiment.device_channels
-        tcp.crate_batch(ch_nums)
+        tcp.create_batch(ch_nums)
         experiment.set_dataIn(tcp)
     except Exception as e:
         traceback.print_exc()
@@ -201,10 +217,11 @@ def getdata():
     try:
         timeend=int(request.args.get('timeend'))
         arr,rend=experiment.getData(timeend)
-        # print(arr)
+        # print(arr.tolist())
     except Exception as e:
         traceback.print_exc()
         return fail(str(e))
+    print(np.array(arr).shape)
     # ['Fz','Cz','Pz','P3','P4','P7','P8','Oz','O1','O2','T7','T8']
     return success({"data":arr.tolist(),'ch_names':experiment.channels,'timeend':rend})
     
