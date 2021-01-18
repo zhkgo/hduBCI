@@ -343,9 +343,21 @@
 <script src="./js/plugins/chosen/chosen.jquery.js"></script>
 <!--<script src="./js/plugins/dropzone/dropzone.js"></script>-->
 <script src="./js/plugins/iCheck/icheck.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+
+<script>	
+function ws_conn(){	
+    var socket = io();
+    socket.on('my_response', function(msg, cb) {
+                console.log(msg);
+                if (cb)
+                    cb();
+            });
+}
+</script>
 <script>
     ws = null
-    function ws_conn() {
+/*    function ws_conn() {
         var ws_url = "ws://localhost:10086/ws/startExperiment"
         ws = new WebSocket(ws_url)
         ws.onmessage=function (serv_msg) {
@@ -355,6 +367,8 @@
             console.log(JSON.stringify(msg))
         }
     }
+*/
+
 //    var base_host = "http://192.168.149.212:10086/"
     var base_host = "http://localhost:10086/";
     var dom = document.getElementById("container");
@@ -676,7 +690,7 @@
             $(".selected-filter").val(fil_msg.substr(0, fil_msg.length - 6))
         });
         $(".icon-run").click(function () {
-            //ws_conn();
+            ws_conn();
             var sum = 0;
             loopId = setInterval(getdata, 500);
             //for (var i=1; i<=120; i++) {

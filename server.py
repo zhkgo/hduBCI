@@ -14,23 +14,29 @@ from threading import Lock
 import threading
 from bcifilter import BciFilter
 from experiment import Experiment
-from parses.neuroscanParse import TCPParser
+from flask_socketio import SocketIO,emit
+
+from parses.neuracleParse import TCPParser
 from myresponse import success,fail
 import importlib
-from concurrent.futures import ThreadPoolExecutor
-from  gevent.pywsgi import WSGIServer
+#from  gevent.pywsgi import WSGIServer
 # from  geventwebsocket.websocket import WebSocket,WebSocketError
-from  geventwebsocket.handler import WebSocketHandler
+#from  geventwebsocket.handler import WebSocketHandler
 import os
 import traceback
 from flask_cors import CORS
-import numpy as np
+# Set this variable to "threading", "eventlet" or "gevent" to test the
+# different async modes, or leave it set to None for the application to choose
+# the best option based on installed packages.
+async_mode = None
+thread_lock = Lock()
 app = Flask(__name__,static_url_path="")
 app.config['JSON_AS_ASCII'] = False
-app.debug = False # 设置调试模式，生产模式的时候要关掉debug
+app.config['SECRET_KEY'] = 'secret!'
 CORS(app, supports_credentials=True)
+app.debug = False # 设置调试模式，生产模式的时候要关掉debug
+socketio = SocketIO(app, async_mode=async_mode)
 _thread=None #实验进行时的通讯线程
-lock=Lock()
 experiment = None
 
 
@@ -52,34 +58,31 @@ def index():
 
 @app.route("/opera")
 def h2():
-    return render_template("opera.html")
+    return render_template("opera.html",async_mode=socketio.async_mode)
 
-def backgroun_task(user_socket):
+def background_task():
     global experiment
     while True:
         res=experiment.predictThread()
         if type(res) is str:
             break
-        user_socket.send(success(res))
+        socketio.sleep(0.3)
+        socketio.emit('my_response',success(res))
 
-
-@app.route('/ws/startExperiment')
-def startExperiment():
+@socketio.event
+def connect():
     global experiment,_thread
-    user_socket=request.environ.get("wsgi.websocket")
-    if not user_socket:
-        return fail("请以WEBSOCKET方式连接")
     try:
         experiment.start()
         print("实验开始")
-        with lock:
+        with thread_lock:
             if _thread is None:
-                _thread = threading.Thread(target=backgroun_task,args=(user_socket,))
-                _thread.start()
-                # _thread.join()
+                _thread = socketio.start_background_task(target=background_task)
     except Exception as e:
         traceback.print_exc()
-        return fail(str(e))
+        emit('my_response',fail(str(e)))
+    emit('my_response', success())
+
 #创建实验
 @app.route("/api/createExperiment")
 def createExperiment():
@@ -130,8 +133,9 @@ def createTcp():
     if experiment==None:
         return fail("请先创建实验")
     try:
-        tcp=TCPParser(host='localhost', port=4000)
+        tcp=TCPParser(host='localhost', port=8712)
         ch_nums=experiment.device_channels
+        print("tcp ",tcp)
         tcp.create_batch(ch_nums)
         experiment.set_dataIn(tcp)
     except Exception as e:
@@ -221,11 +225,12 @@ def getdata():
     except Exception as e:
         traceback.print_exc()
         return fail(str(e))
-    print(np.array(arr).shape)
+    # print(np.array(arr).shape)
     # ['Fz','Cz','Pz','P3','P4','P7','P8','Oz','O1','O2','T7','T8']
     return success({"data":arr.tolist(),'ch_names':experiment.channels,'timeend':rend})
     
 if __name__ == '__main__':
-    http_serve=WSGIServer(("0.0.0.0",10086),app,handler_class=WebSocketHandler)
-    http_serve.serve_forever()
-
+    socketio.run(app, host='0.0.0.0',port=10086)
+    #http_serve=WSGIServer(("0.0.0.0",10086),app,handler_class=WebSocketHandler)
+    #http_serve.serve_forever()
+    

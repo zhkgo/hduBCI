@@ -40,7 +40,7 @@ class TCPParser:  # The script contains one main class which handles Streamer da
         np.save(savepathlog,self.data_log)
         np.save(savepathvalue,self.signals[:self.end])
         
-    def crate_batch(self, ch_names, sampleRate=1000):
+    def create_batch(self, ch_names, sampleRate=1000):
         self.ch_names = ch_names
         self.sampleRate = sampleRate
         self.signals = np.zeros((len(ch_names), 3600000))
@@ -48,7 +48,7 @@ class TCPParser:  # The script contains one main class which handles Streamer da
     #获取指定位置的数据 如果传入-1 或者过大的时间值，则返回最新的，
     #若存在滤波器，会在数据返回之前进行滤波
     #windows为长度 startpos为起点
-    def get_batch(self,startPos:int,maxlength=1000):
+    def get_batch(self,startPos:int,maxlength=200):
         if startPos<=-1 :
             startPos=self.end-maxlength
         rend=min(self.end,startPos+maxlength)
