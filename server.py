@@ -62,12 +62,25 @@ def h2():
 
 def background_task():
     global experiment
+    while experiment.fitSessions>0:
+        #socketio.sleep(0.1)
+        res=experiment.trainThreadStep1()
+        if type(res) is str:
+            print(res)
+            socketio.emit('my_response',success({"finish":1,"message":res}))
+            break
+        socketio.emit('my_response',success({"finish":0,"sessions":res[0],"trials":res[1]}))
+    if experiment.fitSessions>0:
+        res=experiment.trainThreadStep2()
+        socketio.emit('my_response',success({"finish":1,"message":res}))
     while True:
         res=experiment.predictThread()
         if type(res) is str:
+            print(res)
+            socketio.emit('my_response',success({"finish":1,"message":res}))
             break
-        socketio.sleep(0.3)
-        socketio.emit('my_response',success(res))
+        #socketio.sleep(0.1)
+        socketio.emit('my_response',success({"finish":0,"predict":res[0],"true":res[1]}))
 
 @socketio.event
 def connect():
@@ -90,13 +103,14 @@ def createExperiment():
     try:    
         experiment=Experiment()
         sessions=int(request.args.get('sessions'))
+        fitSessions=int(request.get("fitsessions"))
         trials=int(request.args.get('trials'))
         duration=int(request.args.get('duration'))
         interval=int(request.args.get('interval'))
         tmin=int(request.args.get('tmin'))
         tmax=int(request.args.get('tmax'))
         device=int(request.args.get('device'))
-        experiment.setParameters(sessions,trials,duration,interval,tmin,tmax,device)
+        experiment.setParameters(sessions,fitSessions,trials,duration,interval,tmin,tmax,device)
     except Exception as e:
         traceback.print_exc()
         return fail(str(e))

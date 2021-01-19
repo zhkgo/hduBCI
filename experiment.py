@@ -23,6 +23,7 @@ class Experiment:
         self.tcpThread = None
         self.windows=1000
         
+        self.fitSessions=0
         self.startTime=0 #实验开始时间 单位ms
         self.sessions=0 #session数量 
         self.trials=0  #每个session的trial数量
@@ -33,6 +34,9 @@ class Experiment:
         self.device=0  #device= 0 博瑞康 device=1 nueroscan 
         self.device_channels=[]
         self.events=[]
+        self.fitEvents=[]
+        self.trainData=[]
+        self.labels=[]
         # self.end=0
     def finish(self):
         self.done=True
@@ -46,22 +50,31 @@ class Experiment:
         self.tcp.saveData()
         self.tcpTread.join()
         print("TCP线程已成功关闭")
-    def setParameters(self,sessions:int,trials:int,duration:int,interval:int,tmin:int,tmax:int,device:int):
+    def setParameters(self,sessions:int,fitSessions:int,trials:int,duration:int,interval:int,tmin:int,tmax:int,device:int):
         self.sessions=sessions
         self.trials=trials
         self.duration=duration
         self.interval=interval
         self.tmin=tmin
         self.tmax=tmax
+        self.fitSessions=fitSessions
         cur=0
-        for i in range(self.sessions):
-            for j in range(self.trials):    
+        
+        for i in range(self.fitSessions):
+            for j in range(self.trials):
+                self.fitEvents.append(cur)
+                cur+=self.duration
+            cur+=self.interval
+
+        for i in range(self.fitSessions,self.sessions):
+            for j in range(self.trials):
                 self.events.append(cur)
                 cur+=self.duration
             cur+=self.interval
         self.device=device
         assert device<2,"设备编号应当小于2"
         self.device_channels=self.CHANNELS[self.device]
+    
     def restart_tcp(self):
         self.stop_tcp()
         self.tcp.reinit()
@@ -80,7 +93,8 @@ class Experiment:
     #若存在滤波器，会在数据返回之前进行滤波
     #windows为长度 startpos为起点
     # 返回滤波后数据和数据截止时间点
-    def getData(self,startpos:int,windows=1000):
+    #数据格式为 channels*times
+    def getData(self,startpos:int,windows=100):
         data,rend=self.tcp.get_batch(startpos,maxlength=windows)
         if self.filter:
             data=self.filter.deal(data)
@@ -93,16 +107,41 @@ class Experiment:
     def set_classfier(self,clf):
         # assert hasattr(clf,'fit'),"分类器不存在fit函数"
         assert hasattr(clf, 'predict'),"分类器不存在predict函数"
+        if self.fitSessions>0:
+            assert hasattr(clf, 'aug_train'),"预训练参数不为0时必须包含增强训练(aug_train)函数"    
         self.classfier = clf
+        try:
+            self.labels=np.load("models/labels.npy")
+            print("标签长度为：",len(self.labels))
+        except:
+            assert False,"模型加载完毕，未检测到标签"
+        
+    def trainThreadStep1(self):
+        fitslen=len(self.fitEvents)
+        while self.i<fitslen:
+            if self.startTime+self.fitEvents[self.i]+self.tmax<self.tcp.end:
+                sample=self.getData(self.startTime+self.events[self.i]+self.tmin,self.tmax-self.tmin)
+                self.trainData.append(sample)
+                self.i+=1
+                return int(self.i//self.trials+1),int(self.i%self.trials+1)
+        return "预训练参数采集完毕,正在增量训练中"
+    def trainThreadStep2(self):
+        self.trainLabel=self.labels[:len(self.fitEvents)]
+        self.classfier.aug_train(np.array(self.trianData,self.trainLabel))
+        self.i=0
+        return "增量训练完毕,即将开始测试"
     def predictThread(self):
         eventslen=len(self.events)
+        fitslen=len(self.fitEvents)
+        lenlabels=len(self.labels)
         while self.i<eventslen:
             if self.startTime+self.events[self.i]+self.tmax<self.tcp.end:
                 self.res[self.i]=self.predictOnce(self.startTime+self.events[self.i]+self.tmin,self.tmax-self.tmin)
                 # np.roll(self.res,1,axis=0)
                 self.i+=1
-                return int(self.res[self.i-1])
+                return int(self.res[self.i-1]),int(self.labels[self.i-1+fitslen]) if lenlabels>self.i-1+fitslen else "未给出"
         return "实验结束"
+    
     def start(self):
         assert self.tcp !=None ,"接入数据不能为空"
         assert self.classfier !=None, "分类器不能为空"
