@@ -14,9 +14,9 @@ from threading import Lock
 import threading
 from bcifilter import BciFilter
 from experiment import Experiment
-from flask_socketio import SocketIO,emit
+from flask_socketio import SocketIO, emit
 
-from parses.neuracleParse import TCPParser
+from parses.neuroscanParse import TCPParser
 from myresponse import success,fail
 import importlib
 #from  gevent.pywsgi import WSGIServer
@@ -63,8 +63,10 @@ def h2():
 def background_task():
     global experiment
     while experiment.fitSessions>0:
-        #socketio.sleep(0.1)
+        socketio.sleep(0.1)
         res=experiment.trainThreadStep1()
+        if res=="wait":
+            continue
         if type(res) is str:
             print(res)
             socketio.emit('my_response',success({"finish":1,"message":res}))
@@ -74,12 +76,14 @@ def background_task():
         res=experiment.trainThreadStep2()
         socketio.emit('my_response',success({"finish":1,"message":res}))
     while True:
+        socketio.sleep(0.1)
         res=experiment.predictThread()
+        if res=="wait":
+            continue
         if type(res) is str:
             print(res)
             socketio.emit('my_response',success({"finish":1,"message":res}))
             break
-        #socketio.sleep(0.1)
         socketio.emit('my_response',success({"finish":0,"predict":res[0],"true":res[1]}))
 
 @socketio.event
@@ -103,7 +107,7 @@ def createExperiment():
     try:    
         experiment=Experiment()
         sessions=int(request.args.get('sessions'))
-        fitSessions=int(request.get("fitsessions"))
+        fitSessions=int(request.args.get("fitsessions"))
         trials=int(request.args.get('trials'))
         duration=int(request.args.get('duration'))
         interval=int(request.args.get('interval'))
@@ -147,7 +151,7 @@ def createTcp():
     if experiment==None:
         return fail("请先创建实验")
     try:
-        tcp=TCPParser(host='localhost', port=8712)
+        tcp=TCPParser(host='localhost', port=4000)
         ch_nums=experiment.device_channels
         print("tcp ",tcp)
         tcp.create_batch(ch_nums)

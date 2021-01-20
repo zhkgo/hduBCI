@@ -13,7 +13,7 @@ demo 文件。
 3.模型可以自己进行封装，比如把原来不是predict的封装成带predict函数的类，加入预处理等等。
 '''
 def getClassName():
-    return ['FlatFeature']
+    return ['FlatFeature','BrainClass']
 class FlatFeature:
     def __init__(self,ch_nums=16,types="stand"):
         book={"minmax":MinMaxScaler,"stand":StandardScaler}
@@ -37,9 +37,19 @@ def getScaler():
     with open("models/ff.scaler","rb") as f:
         scaler=pickle.load(f)
     return scaler
+class BrainClass:
+    def __init__(self):
+        self.model=None
+        self.scaler=getScaler()
+        with open("models/svm.model","rb") as f:
+            self.model=pickle.load(f)
+        self.pipe=Pipeline(steps=[('scaler', self.scaler), ('svm', self.model)])
+    def aug_train(self,train_x,train_y):
+        train_x=self.scaler.fit_transform(train_x,train_y)
+        self.model.fit(train_x,train_y)
+        self.pipe=Pipeline(steps=[('scaler', self.scaler), ('svm', self.model)])
+    def predict(self,test_x):
+        return self.pipe.predict(test_x)
+
 def getModel():
-    model=None
-    with open("models/svm.model","rb") as f:
-        model=pickle.load(f)
-    pipe=Pipeline(steps=[('scaler', getScaler()), ('svm', model)])
-    return pipe
+    return BrainClass()

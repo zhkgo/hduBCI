@@ -120,14 +120,19 @@ class Experiment:
         fitslen=len(self.fitEvents)
         while self.i<fitslen:
             if self.startTime+self.fitEvents[self.i]+self.tmax<self.tcp.end:
-                sample=self.getData(self.startTime+self.events[self.i]+self.tmin,self.tmax-self.tmin)
+                sample,_=self.getData(self.startTime+self.fitEvents[self.i]+self.tmin,self.tmax-self.tmin)
                 self.trainData.append(sample)
                 self.i+=1
+                print("当前采集了%s条数据"%(self.i))
+                print(sample.shape)
+                # print("数据维度为%s"%(sample.shape))
                 return int(self.i//self.trials+1),int(self.i%self.trials+1)
+            else:
+                return "wait"
         return "预训练参数采集完毕,正在增量训练中"
     def trainThreadStep2(self):
         self.trainLabel=self.labels[:len(self.fitEvents)]
-        self.classfier.aug_train(np.array(self.trianData,self.trainLabel))
+        self.classfier.aug_train(np.array(self.trainData), self.trainLabel)
         self.i=0
         return "增量训练完毕,即将开始测试"
     def predictThread(self):
@@ -140,6 +145,8 @@ class Experiment:
                 # np.roll(self.res,1,axis=0)
                 self.i+=1
                 return int(self.res[self.i-1]),int(self.labels[self.i-1+fitslen]) if lenlabels>self.i-1+fitslen else "未给出"
+            else:
+                return "wait"
         return "实验结束"
     
     def start(self):
