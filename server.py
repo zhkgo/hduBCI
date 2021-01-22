@@ -151,7 +151,7 @@ def createTcp():
     if experiment==None:
         return fail("请先创建实验")
     try:
-        tcp=TCPParser(host='localhost', port=4000)
+        tcp=TCPParser(host='10.1.25.96', port=4000)
         ch_nums=experiment.device_channels
         print("tcp ",tcp)
         tcp.create_batch(ch_nums)

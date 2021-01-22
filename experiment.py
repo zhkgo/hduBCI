@@ -94,7 +94,7 @@ class Experiment:
     #windows为长度 startpos为起点
     # 返回滤波后数据和数据截止时间点
     #数据格式为 channels*times
-    def getData(self,startpos:int,windows=100):
+    def getData(self,startpos:int,windows=1000):
         data,rend=self.tcp.get_batch(startpos,maxlength=windows)
         if self.filter:
             data=self.filter.deal(data)
