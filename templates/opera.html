@@ -26,7 +26,7 @@
         .left-container {
             background-color: rgb(253, 253, 253);
             width: 40%;
-            min-height: 700px;
+            min-height: 650px;
             margin-left: 7%;
             border: none;
             font-family: -apple-system, BlinkMacSystemFont, PingFang SC, Helvetica, Tahoma, Arial, Hiragino Sans GB, Microsoft YaHei, "\5FAE\8F6F\96C5\9ED1", sans-serif;
@@ -39,7 +39,7 @@
 
         .right-container {
             width: 40%;
-            height: 700px;
+            height: 650px;
             float: right;
             margin-right: 7%;
             box-shadow: 0 1px 5px #ddd;
@@ -57,7 +57,7 @@
         }
 
         .console-body {
-            height: 560px;
+            height: 510px;
             overflow-y: scroll;
         }
 
@@ -140,13 +140,13 @@
         }
 
         .canvas-eeg {
-            width: 500px;
-            height: 700px;
+            width: 100px;
+            height: 650px;
             overflow-y: scroll;
             float: left;
             background-color: rgb(252,252,253);
+            /*background-color: rgb(252,0,0);*/
             display: none;
-            {#background-color: rgb(252,0,0);#}
         }
 
         .adjust-value {
@@ -157,6 +157,19 @@
             float: left;
             position: relative;
             display: none;
+        }
+
+        .down-scroll {
+            width: 9.8%;
+            min-height: 70px;
+            height: auto !important;
+            float: right;
+            position: relative;
+        }
+
+        .down-scroll-icon {
+            background-color: rgb(150,150,150);
+            border: none;
         }
     </style>
 </head>
@@ -174,17 +187,19 @@
             <div class="col-sm-7"><input type="text" value="10" class="form-control param1"></div>
             <label class="col-sm-1 control-label">次</label>
         </div>
-        <div class="hr-line-dashed"></div>
         <div class="form-group"><label class="col-sm-4 control-label">单个实验试次数</label>
             <div class="col-sm-7"><input type="text" value="50" class="form-control param2"></div>
             <label class="col-sm-1 control-label">次</label>
         </div>
-        <div class="hr-line-dashed"></div>
-        <div class="form-group"><label class="col-sm-4 control-label">实验休息间隔</label>
-            <div class="col-sm-7"><input type="text" value="20000" class="form-control param3"></div>
-            <label class="col-sm-1 control-label">ms</label>
+        <div class="form-group"><label class="col-sm-4 control-label">预训练试次数</label>
+            <div class="col-sm-7"><input type="text" value="1" class="form-control param7"></div>
+            <label class="col-sm-1 control-label">次</label>
         </div>
         <div class="hr-line-dashed"></div>
+        <div class="form-group"><label class="col-sm-4 control-label">实验休息间隔</label>
+            <div class="col-sm-7"><input type="text" value="10000" class="form-control param3"></div>
+            <label class="col-sm-1 control-label">ms</label>
+        </div>
         <div class="form-group"><label class="col-sm-4 control-label">试次开始时间</label>
             <div class="col-sm-7"><input type="text" value="0" class="form-control param4"></div>
             <label class="col-sm-1 control-label">ms</label>
@@ -194,7 +209,6 @@
             <div class="col-sm-7"><input type="text" value="1000" class="form-control param5"></div>
             <label class="col-sm-1 control-label">ms</label>
         </div>
-        <div class="hr-line-dashed"></div>
         <div class="form-group"><label class="col-sm-4 control-label">数据间隔步长</label>
             <div class="col-sm-7"><input type="text" value="1000" class="form-control param6"></div>
             <label class="col-sm-1 control-label">ms</label>
@@ -210,11 +224,6 @@
     </form>
     <form id="form2" class="form-horizontal">
         <h2>预处理选择</h2>
-        <div class="hr-line-dashed"></div>
-        <div class="form-group"><label class="col-sm-4 control-label">预训练试次数</label>
-            <div class="col-sm-7"><input type="text" value="1" class="form-control pre-num"></div>
-            <label class="col-sm-1 control-label">次</label>
-        </div>
         <div class="hr-line-dashed"></div>
         <div class="form-group"><label class="col-sm-4 control-label">通道选择</label>
             <div class="col-sm-7"><input type="text" value="FZ,FC1,FC2,C3,CZ,C4,CP1,CP2,P7,P3,PZ,P4,P8,O1,OZ,O2" class="form-control selected-channels" placeholder="用英文逗号隔开，例如C3,C4,Cz"></div>
@@ -300,7 +309,7 @@
         <div class="hr-line-dashed"></div>
         <div id="cloud">
             <div id="file_queue"></div>
-            <input type="file" name="file_upload" id="file_upload" />
+            <input type="file" name="file_upload" id="file_upload" multiple="multiple"/>
         </div>
         <div class="hr-line-dashed"></div>
         <div class="form-group">
@@ -313,13 +322,13 @@
         </div>
     </div>
     <div class="canvas-eeg">
-        <div id="container" style="height: 2800px; width: 637px;"></div>
+        <div id="container" style="height: 2800px; width: 100%;"></div>
     </div>
 </div>
 <div class="icon-container" style="width:6%;float:left;padding-left:10px;">
-<div class="btn btn-defaul icon-btn" style="">
-    <span class="glyphicon glyphicon-forward icon-run"></span>
-</div>
+    <div class="btn btn-defaul icon-btn icon-run-app" disabled="disabled">
+        <span class="glyphicon glyphicon-forward icon-run"></span>
+    </div>
 </div>
 <div class="right-container">
     <span class="console-title">Console Outputs</span>
@@ -330,6 +339,9 @@
     <input value="+" type="button" class="btn btn-default" onclick="addValue()"/>
     <input value="-" type="button" class="btn btn-default" onclick="subValue()"/>
     <span class="nowValue">50</span>
+</div>
+<div class="down-scroll">
+    <span class="glyphicon glyphicon-sort-by-attributes-alt btn btn-default down-scroll-icon"></span>
 </div>
 <script src="./js/jquery.uploadifive.js"></script>
 <script type="text/javascript" src="./echarts/echarts.min.js"></script>
@@ -345,42 +357,187 @@
 <script src="./js/plugins/iCheck/icheck.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
 
-<script>	
-function ws_conn(){	
-    var socket = io();
-    socket.on('my_response', function(msg, cb) {
-                console.log(msg);
-                if (cb)
-                    cb();
-            });
-}
+<script>
+    trials_per_session = 50
+    rest_time = 20
+    pre_training = true
+    sample = 1
+    right_sample = 0
+    function ws_conn(){
+        var socket = io();
+        socket.on('my_response', function(msg, cb) {
+            console.log(msg)
+            msg = JSON.parse(msg)
+            if (msg.data.sessions != undefined) {
+                console_log("预训练中：session("+msg.data.sessions+")，trial("+msg.data.trials+")")
+            } else if (pre_training == true && msg.data.finish == 1) {
+                pre_training = false  // bug1：session2也会过来
+                console_log("模型构建中...")
+            } else if ( msg.data.predict != undefined) {
+                var res = "错误"
+                if (msg.data.predict == msg.data.true) {
+                    res = "正确"
+                    right_sample = right_sample + 1
+                }
+                console_log("在线测试：第"+sample+"个样本，预测类别为"+msg.data.predict+"，预测"+res+"，当前正确率："+
+                    parseInt(right_sample*100/sample) + "%")
+                sample = sample + 1
+            }
+            if (sample % trials_per_session == 0) {
+                now_session = parseInt(sample/trials_per_session)
+                setTimeout(function () {
+                    console_log("已经过"+now_session+"个实验，休息"+rest_time+"秒")
+                }, 1000)
+            }
+            if (cb)
+                cb();
+        });
+    }
 </script>
 <script>
-    ws = null
-/*    function ws_conn() {
-        var ws_url = "ws://localhost:10086/ws/startExperiment"
-        ws = new WebSocket(ws_url)
-        ws.onmessage=function (serv_msg) {
-            console.log("test:" + serv_msg.data)
-        }
-        ws.onopen=function (msg) {
-            console.log(JSON.stringify(msg))
-        }
-    }
-*/
-
-//    var base_host = "http://192.168.149.212:10086/"
     var base_host = "http://localhost:10086/";
-    var dom = document.getElementById("container");
-    var myChart = echarts.init(dom);
     option = null;
     var showLength = 1000
     var nowFos = 0
     var indata = Array.from({length:16},x=>Array.from({length:showLength}, y=>0));
     var newdata = [];
     var timeend = -1;
+    scroll_down = true;
     value = 50
-    function addValue() {
+    dom = null
+    myChart = null
+    function getdata() {
+        httpRequest(base_host + "api/getdata",{'timeend': -1},'get', function (dat) {
+            dat = JSON.parse(dat)
+            var data = dat['data']
+            timeend = data['timeend'];
+            newdata = data['data'];
+            //console.log(typeof (indata[0][0]))#
+            ch_names = data['ch_names'];
+            var nowTime = timeend
+            refresh();
+        }, true )
+      //  $.ajax({
+      //      url: base_host + "api/getdata", //请求地址
+        //    type: "get", //请求方式
+          //  data: {'timeend': timeend}, dataType: "json", //这里的data:发送给服务器的请求数据
+           // success: function (dat) { //回调函数：数据请求成功之后调用
+            //    var data = dat['data']
+             //   timeend = data['timeend'];
+             //   newdata = data['data'];
+              //  //console.log(typeof (indata[0][0]))#
+               // ch_names = data['ch_names'];
+                //refresh();
+           // }
+       // })
+    }
+    function page2Valid() {
+        //return true
+        var selected = $(".selected-channels").val();
+        var channels = selected.split(",");
+        var valid_chans = ['FP1','FPZ','FP2','AF3','AF4','F7','F5','F3','F1','FZ','F2','F4','F6','F8','FT7','FC5','FC3','FC1','FCZ','FC2','FC4','FC6','FT8','T7','C5','C3','C1','CZ','C2','C4','C6','T8','M1','TP7','CP5','CP3','CP1','CPZ','CP2','CP4','CP6','TP8','M2','P7','P5','P3','P1','PZ','P2','P4','P6','P8','PO7','PO5','PO3','POZ','PO4','PO6','PO8','CB1','O1','OZ','O2','CB2']
+        var right_chan = 'valid'
+        for (var i=0; i<channels.length; i++) {
+            if (valid_chans.indexOf(channels[i]) == -1) {
+                right_chan = channels[i]
+                layer.msg(right_chan + "通道不存在")
+                return false
+            }
+        }
+
+        var down_samples = $(".selected-samples").val();
+        if (!(/(^[1-9]\d*$)/.test(down_samples))) {
+            layer.msg("请输入正确的降采样数")
+            return false
+        }
+        var selected_filter = $(".selected-filter").val()
+        var low = 0
+        var high = 0
+        if ($.trim(selected_filter)!="") {
+            low = selected_filter.split("-")[0]
+            high = selected_filter.split("-")[1]
+            if (!(/(^[1-9]\d*$)/.test(low)) || !(/(^[1-9]\d*$)/.test(high))) {
+                layer.msg("请输入正确的滤波方式")
+                return false
+            } else {
+                low = parseInt(low);
+                high = parseInt(high);
+                if (low >= high) {
+                    layer.msg("请输入正确的滤波方式")
+                    return false
+                }
+            }
+        }
+        var data_aug = $(".select-aug").val();
+        var save_mat = $('#is_save_mat').prop('checked');
+        var code = 0
+        httpRequest(base_host+"api/createFilter",
+            {"low":low, "high": high, "sampleRate": down_samples, "channels": JSON.stringify(channels),"dataAug":data_aug, "dataSave": save_mat},
+            'GET', function () {code = 1}, false
+        )
+        if (code == 1) return true
+        return false
+    }
+    function page1Valid() {
+        //return true
+        var param1 = $(".param1").val()
+        var param2 = $(".param2").val()
+        var param3 = $(".param3").val()
+        var param4 = $(".param4").val()
+        var param5 = $(".param5").val()
+        var param6 = $(".param6").val()
+        var param7 = $(".param7").val()
+        if (!(/(^[1-9]\d*$)/.test(param1))) {
+            layer.msg("请输入正确的实验次数")
+        } else if (!(/(^[1-9]\d*$)/.test(param2))) {
+            layer.msg("请输入正确的单个实验试次数量")
+        } else if (!(/(^[1-9]\d*$)/.test(param3))) {
+            layer.msg("请输入正确的实验休息间隔")
+        } else if ($.trim(param4)!=0 && !(/(^[1-9]\d*$)/.test(param4))) {
+            layer.msg("请输入正确的试次开始时间")
+        } else if ($.trim(param7)!=0 && !(/(^[1-9]\d*$)/.test(param7))) {
+            layer.msg("请输入正确的预训练次数")
+        } else if (!(/(^[1-9]\d*$)/.test(param5))) {
+            layer.msg("请输入正确的有效数据长度")
+        } else if (!(/(^[1-9]\d*$)/.test(param6))) {
+            layer.msg("请输入正确的数据间隔步长")
+        } else {
+            var code = 0
+            httpRequest(base_host+"api/createExperiment",
+                {"sessions":param1, "trials": param2, "interval": param3, "duration": param6, "tmin": param4, "tmax": (parseInt(param4) + parseInt(param5)), "device":1, "fitsessions":param7},
+                'GET', function () {code = 1}, false
+            )
+            if (code == 1) {
+                trials_per_session = param2
+                rest_time = parseInt(param3/1000)
+                return true
+            }
+        }
+        return false
+    }
+    function console_log(msg) {
+        $(".console-body").append("<span>"+getCurrentTime()+"[ParseData]: "+msg+"</span>")
+        if (scroll_down == true) {
+            $(".console-body").animate({scrollTop: $(".console-body").prop("scrollHeight")}, 400);//0.4秒内滚到底部
+        }
+    }
+    function console_item(time, fos, answer, acc) {
+        setTimeout(function () {
+            $(".console-body").append("<span>"+getCurrentTime()+"[server]: 第"+fos+"条样本预测："+answer+"，当前准确率"+acc+"%</span>")
+            if (scroll_down == true) {
+                $(".console-body").animate({scrollTop: $(".console-body").prop("scrollHeight")}, 400);//0.4秒内滚到底部
+            }
+        }, time)
+    }
+    function augment_resize() {
+        $(".aug-box").html("<div class=\"input-group aug-text\" style=\"width:300px;\">"+
+            "<select data-placeholder=\"选择数据增强方式\" class=\"chosen-select pull-right select-aug\" multiple style=\"width:100%;\">"+
+            "<option value=\"高斯噪声\">高斯噪声</option><option value=\"数据翻转\">数据翻转</option><option value=\"窗口滑动5%\">窗口滑动5%</option>"+
+            "<option value=\"其他\">其他</option></select></div>")
+        $(".aug-text").css("width",$(".resize-aug").width());
+        $(".chosen-select").chosen({});
+    }
+        function addValue() {
         value = value * 2
         $(".nowValue").text(value)
     }
@@ -406,7 +563,7 @@ function ws_conn(){
         var time = year + "-" + month + "-" + date+ " " + hour + ":" + minu + ":" + sec;
         return time;
     }
-    function refresh() {
+     function refresh() {
         var grids = [];
         var xAxes = [];
         var yAxes = [];
@@ -467,155 +624,77 @@ function ws_conn(){
             myChart.setOption(option, true);
         }
     }
-    function getdata() {
-        httpRequest(base_host + "api/getdata",{'timeend': timeend},'get', function (dat) {
-            dat = JSON.parse(dat)
-            var data = dat['data']
-            timeend = data['timeend'];
-            newdata = data['data'];
-            //console.log(typeof (indata[0][0]))#
-            ch_names = data['ch_names'];
-            var nowTime = timeend
-            refresh();
-        }, true )
-      //  $.ajax({
-      //      url: base_host + "api/getdata", //请求地址
-        //    type: "get", //请求方式
-          //  data: {'timeend': timeend}, dataType: "json", //这里的data:发送给服务器的请求数据
-           // success: function (dat) { //回调函数：数据请求成功之后调用
-            //    var data = dat['data']
-             //   timeend = data['timeend'];
-             //   newdata = data['data'];
-              //  //console.log(typeof (indata[0][0]))#
-               // ch_names = data['ch_names'];
-                //refresh();
-           // }
-       // })
-    }
-    function page2Valid() {
-        //return true
-        var pre_num = $(".pre-num").val();
-        if (!(/(^[1-9]\d*$)/.test(pre_num))) {
-            layer.msg("请输入正确的预训练试次数")
-            return
-        }
-        var selected = $(".selected-channels").val();
-        var channels = selected.split(",");
-        var valid_chans = ['FP1','FPZ','FP2','AF3','AF4','F7','F5','F3','F1','FZ','F2','F4','F6','F8','FT7','FC5','FC3','FC1','FCZ','FC2','FC4','FC6','FT8','T7','C5','C3','C1','CZ','C2','C4','C6','T8','M1','TP7','CP5','CP3','CP1','CPZ','CP2','CP4','CP6','TP8','M2','P7','P5','P3','P1','PZ','P2','P4','P6','P8','PO7','PO5','PO3','POZ','PO4','PO6','PO8','CB1','O1','OZ','O2','CB2']
-        var right_chan = 'valid'
-        for (var i=0; i<channels.length; i++) {
-            if (valid_chans.indexOf(channels[i]) == -1) {
-                right_chan = channels[i]
-                layer.msg(right_chan + "通道不存在")
-                return false
+$(document).ready(function () {
+    ws = null
+    /*    function ws_conn() {
+            var ws_url = "ws://localhost:10086/ws/startExperiment"
+            ws = new WebSocket(ws_url)
+            ws.onmessage=function (serv_msg) {
+                console.log("test:" + serv_msg.data)
+            }
+            ws.onopen=function (msg) {
+                console.log(JSON.stringify(msg))
             }
         }
-
-        var down_samples = $(".selected-samples").val();
-        if (!(/(^[1-9]\d*$)/.test(down_samples))) {
-            layer.msg("请输入正确的降采样数")
-            return false
-        }
-        var selected_filter = $(".selected-filter").val()
-        var low = 0
-        var high = 0
-        if ($.trim(selected_filter)!="") {
-            low = selected_filter.split("-")[0]
-            high = selected_filter.split("-")[1]
-            if (!(/(^[1-9]\d*$)/.test(low)) || !(/(^[1-9]\d*$)/.test(high))) {
-                layer.msg("请输入正确的滤波方式")
-                return false
-            } else {
-                low = parseInt(low);
-                high = parseInt(high);
-                if (low >= high) {
-                    layer.msg("请输入正确的滤波方式")
-                    return false
-                }
-            }
-        }
-        var data_aug = $(".select-aug").val();
-        var save_mat = $('#is_save_mat').prop('checked');
-        var code = 0
-        httpRequest(base_host+"api/createFilter",
-            {"low":low, "high": high, "sampleRate": down_samples, "channels": JSON.stringify(channels),"dataAug":data_aug, "dataSave": save_mat},
-            'GET', function () {code = 1}, false
-        )
-        if (code == 1) return true
-        return false
-    }
-    function page1Valid() {
-        //return true
-        var param1 = $(".param1").val()
-        var param2 = $(".param2").val()
-        var param3 = $(".param3").val()
-        var param4 = $(".param4").val()
-        var param5 = $(".param5").val()
-        var param6 = $(".param6").val()
-        if (!(/(^[1-9]\d*$)/.test(param1))) {
-            layer.msg("请输入正确的实验次数")
-        } else if (!(/(^[1-9]\d*$)/.test(param2))) {
-            layer.msg("请输入正确的单个实验试次数量")
-        } else if (!(/(^[1-9]\d*$)/.test(param3))) {
-            layer.msg("请输入正确的实验休息间隔")
-        } else if ($.trim(param4)!=0 && !(/(^[1-9]\d*$)/.test(param4))) {
-            layer.msg("请输入正确的试次开始时间")
-        } else if (!(/(^[1-9]\d*$)/.test(param5))) {
-            layer.msg("请输入正确的有效数据长度")
-        } else if (!(/(^[1-9]\d*$)/.test(param6))) {
-            layer.msg("请输入正确的数据间隔步长")
-        } else {
-            var code = 0
-            httpRequest(base_host+"api/createExperiment",
-                {"sessions":param1, "trials": param2, "interval": param3, "duration": param6, "tmin": param4, "tmax": (parseInt(param4) + parseInt(param5)), "device":1},
-                'GET', function () {code = 1}, false
-            )
-            if (code == 1) return true
-        }
-        return false
-    }
-    function console_log(msg) {
-        $(".console-body").append("<span>2020-12-18 10:26:23,792[ParseData]: INFO: "+msg+"</span>")
-        $(".console-body").animate({scrollTop:$(".console-body").prop("scrollHeight")}, 400);//0.4秒内滚到底部
-    }
-    function console_item(time, fos, answer, acc) {
-        setTimeout(function () {
-            $(".console-body").append("<span>"+getCurrentTime()+"[server]: INFO: 第"+fos+"条样本预测："+answer+"，当前准确率"+acc+"%</span>")
-            $(".console-body").animate({scrollTop:$(".console-body").prop("scrollHeight")}, 400);//0.4秒内滚到底部
-        }, time)
-    }
-    function augment_resize() {
-        $(".aug-box").html("<div class=\"input-group aug-text\" style=\"width:300px;\">"+
-            "<select data-placeholder=\"选择数据增强方式\" class=\"chosen-select pull-right select-aug\" multiple style=\"width:100%;\">"+
-            "<option value=\"高斯噪声\">高斯噪声</option><option value=\"数据翻转\">数据翻转</option><option value=\"窗口滑动5%\">窗口滑动5%</option>"+
-            "<option value=\"其他\">其他</option></select></div>")
-        $(".aug-text").css("width",$(".resize-aug").width());
-        $(".chosen-select").chosen({});
-    }
-    $(document).ready(function () {
-        // 数据增强改变大小
+    */
+    $(".icon-container").css("padding-left", ($('html').width() * 0.06 - 50)/2)
+    $(".canvas-eeg").css({"width": $('html').width() * 0.4})
+    $("#container").css({"width": $('html').width() * 0.4})
+    dom = document.getElementById("container");
+    myChart = echarts.init(dom);
+    // 数据增强改变大小
+    augment_resize()
+    $(window).resize(function(){
         augment_resize()
-        $(".icon-container").css("padding-left", ($('html').width() * 0.06 - 50)/2)
         $(".canvas-eeg").css({"width":$('html').width() * 0.4})
-        $(window).resize(function(){
+        $("#container").css({"width": $('html').width() * 0.4})
+        $(".icon-container").css("padding-left", ($('html').width() * 0.06 - 50)/2)
+    });
+    $('.i-checks').iCheck({
+        checkboxClass: 'icheckbox_square-green',
+        radioClass: 'iradio_square-green',
+    });
+    $(".step1").click(function () {
+        if (page1Valid() == true) {
+            $("#form1").animate({left: '-150px', opacity: '0'});
+            $("#form2").animate({left: '9%', opacity: '1'});
+            $("#form2").css({'display': 'block'})
+            setTimeout(function () {
+                $("#form1").css({'display': 'none'})
+            }, 300)
             augment_resize()
-            $(".canvas-eeg").css({"width":$('html').width() * 0.4})
-            $(".icon-container").css("padding-left", ($('html').width() * 0.06 - 50)/2)
-        });
-        $('.i-checks').iCheck({
-            checkboxClass: 'icheckbox_square-green',
-            radioClass: 'iradio_square-green',
-        });
-        $(".step1").click(function () {
-            if (page1Valid() == true) {
-                $("#form1").animate({left: '-150px', opacity: '0'});
-                $("#form2").animate({left: '9%', opacity: '1'});
-                $("#form2").css({'display': 'block'})
-                setTimeout(function () {
-                    $("#form1").css({'display': 'none'})
-                }, 300)
-                augment_resize()
-                httpRequest(base_host+"api/createTcp", {},
+        }
+    })
+    $(".step2").click(function () {
+        $("#form1").animate({left:'9%', opacity: '1'});
+        $("#form2").animate({left:'150px', opacity:'0'});
+        $("#form1").css({'display': 'block'})
+        setTimeout(function () {
+            $("#form2").css({'display': 'none'})
+        }, 300)
+    })
+    $(".step3").click(function () {
+        if (page2Valid() == true ) {
+            $("#form2").animate({left: '-150px', opacity: '0'});
+            $("#form3").animate({left: '7%', opacity: '1'});
+            $("#form3").css({'display': 'block'})
+            setTimeout(function () {
+                $("#form2").css({'display': 'none'})
+            }, 300)
+        }
+    })
+    $(".step4").click(function () {
+        $("#form2").animate({left:'9%', opacity: '1'});
+        $("#form3").animate({left:'150px', opacity:'0'});
+        $("#form2").css({'display': 'block'})
+        setTimeout(function () {
+            $("#form3").css({'display': 'none'})
+        }, 300)
+        augment_resize()
+    })
+    $(".step5").click(function () {
+        //return true
+        httpRequest(base_host+"api/createTcp", {},
                 'GET', function (data) {
                     data = JSON.parse(data)
                     if (data.code != "0") {
@@ -625,86 +704,73 @@ function ws_conn(){
                     }
                 }, false
             )
-            }
-        })
-        $(".step2").click(function () {
-            $("#form1").animate({left:'9%', opacity: '1'});
-            $("#form2").animate({left:'150px', opacity:'0'});
-            $("#form1").css({'display': 'block'})
-            setTimeout(function () {
-                $("#form2").css({'display': 'none'})
-            }, 300)
-        })
-        $(".step3").click(function () {
-            if (page2Valid() == true ) {
-                $("#form2").animate({left: '-150px', opacity: '0'});
-                $("#form3").animate({left: '7%', opacity: '1'});
-                $("#form3").css({'display': 'block'})
-                setTimeout(function () {
-                    $("#form2").css({'display': 'none'})
-                }, 300)
-            }
-        })
-        $(".step4").click(function () {
-            $("#form2").animate({left:'9%', opacity: '1'});
-            $("#form3").animate({left:'150px', opacity:'0'});
-            $("#form2").css({'display': 'block'})
-            setTimeout(function () {
-                $("#form3").css({'display': 'none'})
-            }, 300)
-            augment_resize()
-        })
-        $(".step5").click(function () {
-            //return true
-            httpRequest(base_host+"api/startTcp", {},
-                'GET', function (data) {
-                    data = JSON.parse(data)
-                    if (data.code != "0") {
-                        layer.msg("TCP开始失败，请查看控制台输出");
-                        console_log(data.data)
-                        return
-                    }
-                }, false
-            )
-            httpRequest(base_host+"api/createClassfier", {},
-                'GET', function (data) {
-                    data = JSON.parse(data)
-                    if (data.code == "0") {
-                        $("#form3").animate({left: '-150px', opacity: '0'});
-                        setTimeout(function () {
-                            $("#form3").css({'display': 'none'})
-                            $(".canvas-eeg").fadeIn(100)
-                            $(".adjust-value").fadeIn(100)
-                        }, 300)
-                        layer.msg("模型构建中...")
-                    } else {
-                        layer.msg("模型构建失败，请查看错误日志");
-                        console_log(data.data)
-                        return
-                    }
-                }, false
-            )
-        })
-        $(".choose-filter").click(function () {
-            fil_msg = $(this).text()
-            $(".selected-filter").val(fil_msg.substr(0, fil_msg.length - 6))
-        });
-        $(".icon-run").click(function () {
+        httpRequest(base_host+"api/startTcp", {},
+            'GET', function (data) {
+                data = JSON.parse(data)
+                if (data.code != "0") {
+                    layer.msg("TCP开始失败，请查看控制台输出");
+                    console_log(data.data)
+                    return
+                }
+            }, false
+        )
+        httpRequest(base_host+"api/createClassfier", {},
+            'GET', function (data) {
+                data = JSON.parse(data)
+                if (data.code == "0") {
+                    $("#form3").animate({left: '-150px', opacity: '0'});
+                    setTimeout(function () {
+                        $("#form3").css({'display': 'none'})
+                        $(".canvas-eeg").fadeIn(100)
+                        $(".adjust-value").fadeIn(100)
+                        $(".down-scroll-icon").fadeIn(100)
+                    }, 300)
+                    layer.msg("模型构建中...")
+                    $('.icon-btn').attr("disabled",false);
+                } else {
+                    layer.msg("模型构建失败，请查看错误日志");
+                    console_log(data.data)
+                    return
+                }
+            }, false
+        )
+    })
+    $(".down-scroll-icon").click(function () {
+        if (scroll_down==true) {
+            scroll_down = false
+            $(".down-scroll-icon").css({"background-color": "rgb(200,200,200)"})
+        } else {
+            scroll_down = true
+            $(".down-scroll-icon").css({"background-color": "rgb(150,150,150)"})
+        }
+    })
+    $(".choose-filter").click(function () {
+        fil_msg = $(this).text()
+        $(".selected-filter").val(fil_msg.substr(0, fil_msg.length - 6))
+    });
+    $(".icon-run-app").click(function () {
+        layer.confirm('请确保已打开Neuroscan开始数据采集按钮（绿色三角形）', {
+          btn: ['已打开','稍后再试'] //按钮
+        }, function(){
             ws_conn();
             var sum = 0;
-            loopId = setInterval(getdata, 500);
-            //for (var i=1; i<=120; i++) {
-            //    var res = Math.floor(Math.random()*10)
-            //    var ans = "错误"
-            //    if (res > 1) {
-            //        sum += 1
-            //        ans = "正确"
-            //    }
-            //    var accu = parseInt(sum*100 / i)
-            //    console_item(i*1000, i, ans, accu)
-            //}
-        })
-    });
+            loopId = setInterval(getdata, 25);
+            layer.closeAll('dialog');
+        }, function(){
+
+        });
+        //for (var i=1; i<=120; i++) {
+        //    var res = Math.floor(Math.random()*10)
+        //    var ans = "错误"
+        //    if (res > 1) {
+        //        sum += 1
+        //        ans = "正确"
+        //    }
+        //    var accu = parseInt(sum*100 / i)
+        //    console_item(i*1000, i, ans, accu)
+        //}
+    })
+});
 
 </script>
 </body>

@@ -883,7 +883,7 @@ Upload 1.2.2
 })(jQuery);
 
 $("#file_upload").uploadifive({
-        'auto' : true, 'multi' : false,
+        'auto' : true, 'multi' : true,
         'fileObjName':'file',
         'uploadScript' : 'api/upload',
         'queueID' : 'file_queue',

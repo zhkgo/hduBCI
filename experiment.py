@@ -123,10 +123,10 @@ class Experiment:
                 sample,_=self.getData(self.startTime+self.fitEvents[self.i]+self.tmin,self.tmax-self.tmin)
                 self.trainData.append(sample)
                 self.i+=1
-                print("当前采集了%s条数据"%(self.i))
-                print(sample.shape)
+                # print("当前采集了%s条数据"%(self.i))
+                # print(sample.shape)
                 # print("数据维度为%s"%(sample.shape))
-                return int(self.i//self.trials+1),int(self.i%self.trials+1)
+                return int((self.i-1)//self.trials+1),int((self.i-1)%self.trials+1)
             else:
                 return "wait"
         return "预训练参数采集完毕,正在增量训练中"
@@ -139,6 +139,9 @@ class Experiment:
         eventslen=len(self.events)
         fitslen=len(self.fitEvents)
         lenlabels=len(self.labels)
+        eeendtime=time.time()
+        print("当前经过时间",eeendtime-self.startTTT)
+        print("数据段游标移动",self.tcp.end-self.startTime)
         while self.i<eventslen:
             if self.startTime+self.events[self.i]+self.tmax<self.tcp.end:
                 self.res[self.i]=self.predictOnce(self.startTime+self.events[self.i]+self.tmin,self.tmax-self.tmin)
@@ -153,6 +156,7 @@ class Experiment:
         assert self.tcp !=None ,"接入数据不能为空"
         assert self.classfier !=None, "分类器不能为空"
         self.startTime=self.tcp.end
+        self.startTTT=time.time()
         self.i=0
         
     def predictOnce(self,startpos=-1,windows=1000):

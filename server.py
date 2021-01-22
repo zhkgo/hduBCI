@@ -15,7 +15,7 @@ import threading
 from bcifilter import BciFilter
 from experiment import Experiment
 from flask_socketio import SocketIO, emit
-
+import numpy as np
 from parses.neuroscanParse import TCPParser
 from myresponse import success,fail
 import importlib
@@ -243,6 +243,7 @@ def getdata():
     except Exception as e:
         traceback.print_exc()
         return fail(str(e))
+    # print("返回数据维度：", np.array(arr).shape)
     # print(np.array(arr).shape)
     # ['Fz','Cz','Pz','P3','P4','P7','P8','Oz','O1','O2','T7','T8']
     return success({"data":arr.tolist(),'ch_names':experiment.channels,'timeend':rend})
