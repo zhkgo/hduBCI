@@ -2,8 +2,6 @@
 hduBCI for connect device、algorithm、application
 
 ## 尚未完成
-- 实验前端页面接入
-- 前端页面美化
-- 后台代码优化
 - 多脑接入
+- 演示程序
 - 未完待续
