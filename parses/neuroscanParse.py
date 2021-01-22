@@ -7,10 +7,12 @@ from threading import Timer
 from threading import Thread
 import threading
 from scipy.io import savemat
+from flask_socketio import SocketIO, emit
+from myresponse import success,fail
 import scipy.io as scio
 
 class TCPParser:
-    def __init__(self, name="neuroscan", host="127.0.0.1", port=4000, save_data=True, save_len=450000):  # 可以通过初始化来传递参数
+    def __init__(self, name="neuroscan", host="127.0.0.1", port=4000, save_data=True, save_len=900000):  # 可以通过初始化来传递参数
         super(TCPParser, self).__init__()
         self.tcp_status = False    # Tcp是否连接
         self.data_status = False   # Neuroscan是否有数据传输
@@ -210,7 +212,9 @@ class TCPParser:
                     break
                 else:
                     print(f"数据头部接收错误！接收数据长度为{len(recv_data)}，接收数据为\n{recv_data}")
-                    break
+                    print("错误\n\n\n\n\n\n\n\n\n\n\n")
+                    # break  # 如果break，出现错误就会溢出
+                    continue  # 如果continue，出现错误就会停止存储新的数据（一段时间），稍后恢复【理论上是这样】
             else:  # 解析数据部
                 neuro_data = np.array([recv_data[i:i + 4] for i in range(0, recv_len, 4)])
                 neuro_data.dtype = '<i4'
