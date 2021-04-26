@@ -62,7 +62,7 @@ class TCPParser(Thread):
         self.session_end = 160000  # RSVP范式中每个session对应的时间戳
         self.rest_time = False   # RSVP中间的休息时间
 
-    def set_save_params(self, path='E:\\xsw_space\\data\\', filename='neuroscan_data'):
+    def set_save_params(self, path='./data', filename='neuroscan_data'):
         self.save_path = path
         self.save_filename = filename
 
