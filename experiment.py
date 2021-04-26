@@ -196,7 +196,7 @@ class Experiment:
         self.i=0
         
     def predictOnce(self,startpos=-1,windows=1000):
-        assert self.tcp !=None ,"接入数据不能为空"
+        assert len(self.tcps)>0,"接入数据不能为空"
         assert self.classfier !=None, "分类器不能为空"
         data,_=self.getData(startpos,windows=windows,tcpid=-1)
         data=np.expand_dims(data,axis=0)

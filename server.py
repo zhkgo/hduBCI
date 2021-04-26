@@ -239,6 +239,26 @@ def savedata():
     global experiment
     experiment.tcp.saveData()
     return success()
+#返回每个人的平均脑电(仅支持双脑)
+@app.route("/api/getdatamean")
+def getDataMean():
+    global experiment
+    # print("TCP END WHEN GET DATA",experiment.tcp.end)
+    try:
+        timeend = int(request.args.get('timeend'))
+        arr, rend = experiment.getData(timeend,windows=100,tcpid=-1)
+        # print(arr.tolist())
+    except Exception as e:
+        traceback.print_exc()
+        return fail(str(e))
+    #TESTBEGIN
+    lchs=len(experiment.channels)//2 #单机测试双脑 所以除以2 正常情况不除
+    #TESTEND
+    arr1=arr[:lchs].mean(axis=0)
+    arr2=arr[lchs:].mean(axis=0)
+    ls=np.vstack([arr1, arr2]).tolist()
+    # print(arr.shape)
+    return success({"data":ls, 'ch_names': ['S1','S2'], 'timeend': rend})
 
 @app.route('/api/getdata')
 def getdata():
