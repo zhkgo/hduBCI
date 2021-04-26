@@ -42,7 +42,7 @@ class TCPParser(Thread):
         self.data_len = 0
         self.event_msg = []
         self.half_save = save_len
-        self.save_path = 'E:\\xsw_space\\data\\'
+        self.save_path = './data'
         self.save_filename = 'neuroscan_data'
         self.global_buffer = np.zeros((self.half_save * 2, 64)).astype(np.float32)   # 只存储64通道数据
         self.global_events = np.zeros((self.half_save * 2)).astype(np.float32)
@@ -300,16 +300,22 @@ class TCPParser(Thread):
 
     # 由于使用了循环队列实现Buffer，因此无法在过程中主动保存，只能选择是否保存全部信号
     # 保存的信号按照编号保存到本地文件中
-    def save_mat(self):
-        print(f"开始保存第{self.save_fos}段数据至mat格式文件中...")
-        if self.end == self.half_save:
-            savemat(self.save_path + self.filename + '_'+str(self.save_fos)+'.mat',
-                    {'dat': self.global_buffer[: self.half_save], 'event': self.global_events[: self.half_save]})
-        else:
-            savemat(self.save_path + self.filename + '_' + str(self.save_fos) + '.mat',
-                    {'dat': self.global_buffer[self.half_save:], 'event': self.global_events[self.half_save:]})
-        print(f"第{self.save_fos}段数据保存完成！")
-        self.save_fos += 1
+    # def save_mat(self):
+    #     print(f"开始保存第{self.save_fos}段数据至mat格式文件中...")
+    #     if self.end == self.half_save:
+    #         savemat(self.save_path + self.filename + '_'+str(self.save_fos)+'.mat',
+    #                 {'dat': self.global_buffer[: self.half_save], 'event': self.global_events[: self.half_save]})
+    #     else:
+    #         savemat(self.save_path + self.filename + '_' + str(self.save_fos) + '.mat',
+    #                 {'dat': self.global_buffer[self.half_save:], 'event': self.global_events[self.half_save:]})
+    #     print(f"第{self.save_fos}段数据保存完成！")
+    #     self.save_fos += 1
+
+    def saveData(self, startfos):
+        print(f"保存{self.name}的数据")
+        savemat(self.save_path + self.name + '.mat',
+                {'dat': self.global_buffer[: self.end], 'event': self.global_events[: self.end], "startfos": startfos})
+        print(f"保存完成！")
 
     def run(self):
         self.parse_data()

@@ -12,11 +12,12 @@ import time
 
 class TCPParser:  # The script contains one main class which handles Streamer data packet parsing.
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, name):
         self.host = host
         self.port = port
         self.data_log = b''
-        self.done =False
+        self.name = name
+        self.done = False
         # print(testnum)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.host, self.port))

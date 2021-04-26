@@ -153,13 +153,16 @@ def createTcp():
     try:
         host=request.args.get("host")
         port=request.args.get("port")
+        tcpname=request.args.get("tcpname")
         if host==None:
             host="10.1.25.96" # 测试用 正常改成localhost
         if port==None:
             port=4000
+        if tcpname==None：
+            tcpname="neuroscan"
         else:
             port=int(port)
-        tcp=TCPParser(host=host, port=port)
+        tcp=TCPParser(host=host, port=port,name=tcpname)
         ch_nums=experiment.device_channels
         print("tcp ",tcp)
         tcp.create_batch(ch_nums)
@@ -237,7 +240,7 @@ def getResult():
 @app.route("/api/saveData")
 def savedata():
     global experiment
-    experiment.tcp.saveData()
+    experiment.saveData()
     return success()
 #返回每个人的平均脑电(仅支持双脑)
 @app.route("/api/getdatamean")

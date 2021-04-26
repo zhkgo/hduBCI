@@ -18,7 +18,7 @@ class Experiment:
         self.scaler=None
         self.filter=None
         self.channels=None
-        self.res=np.zeros((3600,1))
+        self.res=np.zeros((7200,1))
         self.done=False
         self.tcpThread = []
         self.windows=1000
@@ -48,6 +48,11 @@ class Experiment:
             thred=threading.Thread(target=tcp.parse_data)
             thred.start()
             self.tcpThread.append(thred)
+    def saveData(self):
+        for tcp,startTime in zip(self.tcps,self.startTimes):
+            tcp.saveData(startTime)
+            print(tcp.name,end=':')
+            print("TCP线程数据已保存")
     def stop_tcp(self):
         for tcp,thred,startTime in zip(self.tcps,self.tcpThread,self.startTimes):
             tcp.close()
@@ -184,6 +189,7 @@ class Experiment:
                 return int(self.res[self.i-1]),int(self.labels[self.i-1+fitslen]) if lenlabels>self.i-1+fitslen else "未给出"
             else:
                 return "wait"
+        self.finish()#结束实验 保存数据
         return "实验结束"
     
     def start(self):
