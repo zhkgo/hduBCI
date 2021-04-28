@@ -60,6 +60,11 @@ def index():
 def h2():
     return render_template("opera.html",async_mode=socketio.async_mode)
 
+@app.route("/recoder")
+def h3():
+    return render_template("dataRecoder.html")
+
+
 def background_task():
     global experiment
     while experiment.fitSessions>0:
@@ -158,7 +163,7 @@ def createTcp():
             host="10.1.25.96" # 测试用 正常改成localhost
         if port==None:
             port=4000
-        if tcpname==None：
+        if tcpname==None:
             tcpname="neuroscan"
         else:
             port=int(port)
@@ -184,8 +189,31 @@ def startTcp():
         traceback.print_exc()
         return fail(str(e))
     return success()
+#开始记录数据
+@app.route("/api/startRecord")
+def startRecord():
+    global experiment
+    if experiment==None:
+        return fail("请先创建实验")
+    try:
+        experiment.startRecord()
+    except Exception as e:
+        print(e.with_traceback())
+        return fail(str(e))
+    return success()
 
-
+#停止记录数据
+@app.route("/api/stopRecord")
+def stopRecord():
+    global experiment
+    if experiment==None:
+        return fail("请先创建实验")
+    try:
+        experiment.stopRecord()
+    except Exception as e:
+        print(e.with_traceback())
+        return fail(str(e))
+    return success()
 #停止TCP连接
 @app.route("/api/stopTcp")
 def stopTcp():
@@ -249,13 +277,13 @@ def getDataMean():
     # print("TCP END WHEN GET DATA",experiment.tcp.end)
     try:
         timeend = int(request.args.get('timeend'))
-        arr, rend = experiment.getData(timeend,windows=100,tcpid=-1)
+        arr, rend = experiment.getData(timeend,windows=1000,tcpid=-1)
         # print(arr.tolist())
     except Exception as e:
         traceback.print_exc()
         return fail(str(e))
     #TESTBEGIN
-    lchs=len(experiment.channels)//2 #单机测试双脑 所以除以2 正常情况不除
+    lchs=len(experiment.channels) #单机测试双脑 所以除以2 正常情况不除
     #TESTEND
     arr1=arr[:lchs].mean(axis=0)
     arr2=arr[lchs:].mean(axis=0)
@@ -280,7 +308,7 @@ def getdata():
     return success({"data":arr.tolist(),'ch_names':experiment.channels,'timeend':rend})
     
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0',port=10086)
+    socketio.run(app, host='0.0.0.0',port=10086, debug=True)
     #http_serve=WSGIServer(("0.0.0.0",10086),app,handler_class=WebSocketHandler)
     #http_serve.serve_forever()
     

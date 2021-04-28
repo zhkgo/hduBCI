@@ -77,11 +77,11 @@
                             <!--<br/><br/><br/><br/>-->
                             <div style="position: relative; border-bottom: 1px solid gray; border-top: 1px solid gray;">
                                 <div class="radio" style="display: inline-block;">
-                                    <input type="radio" name="radio_title" id="radio1" value="offline" checked=checked>
+                                    <input type="radio" name="radio_title" id="radio1" value="online_train" checked=checked>
                                     <label for="radio1">模型在线训练</label>
                                 </div>
                                 <div class="radio" style="display: inline-block;">
-                                    <input type="radio" name="radio_title" id="radio2" value="online_train">
+                                    <input type="radio" name="radio_title" id="radio2" value="offline">
                                     <label for="radio2">离线数据采集</label>
                                 </div>
                                 <div class="radio" style="display: inline-block;">
@@ -188,7 +188,18 @@
 </div>
 <script>
     $(".neuroscan-title").click(function () {
-        window.location.href = "opera"
+     var radio_name=document.getElementsByName("radio_title");
+     for (var i=0;i<radio_name.length;i++){
+        if(radio_name[i].checked){
+            var isChecked=radio_name[i].value;
+            if(isChecked=="online_train"){
+                window.location.href = "opera";
+            }else if(isChecked=="offline"){
+                window.location.href = "recoder";
+            }
+        }
+     }
+
     })
 </script>
 </body>

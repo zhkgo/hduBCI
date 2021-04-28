@@ -31,7 +31,7 @@ class Experiment:
         self.interval=0 #session之间的间隔
         self.tmin=0 #截取时间起点（相比于trail开始的时间点 单位ms）
         self.tmax=0 #截取时间终点（相比于trail开始的时间点 单位ms）
-        self.device=0  #device= 0 博瑞康 device=1 nueroscan 
+        self.device=0  #device= 0 博瑞康 device=1 neuroscan 
         self.device_channels=[]
         self.events=[]
         self.fitEvents=[]
@@ -117,16 +117,23 @@ class Experiment:
             return data,int(rend)
         totdata = []
         totrend = 100000000
+        minl=100000
         for tcp,startTime in zip(self.tcps,self.startTimes):
             data,rend= tcp.get_batch(startTime+startpos if startpos> -1 else -1, maxlength=windows)
             if self.filter:
                 data = self.filter.deal(data)
             totdata.append(data)
+            print("Experimrnt get rend:", rend)
             rend-=startTime
             totrend=min(totrend,rend) #对齐
+            minl=min(minl,data.shape[1])
+        # print(minl)
         for i in range(len(totdata)):
-            totdata[i]=totdata[i][:][:totrend]
+            totdata[i]=totdata[i][:,:minl]
+            # print("totdata:",end='')
+            # print(totdata[i].shape)
         totdata = np.concatenate(totdata,axis=0)
+        print("Experimrnt return rend:", totrend)
         return totdata,int(totrend)
 
     def set_scaler(self,scaler):
@@ -146,7 +153,14 @@ class Experiment:
             print("标签长度为：",len(self.labels))
         except:
             assert False,"模型加载完毕，未检测到标签"
-
+    def startRecord(self):
+        assert len(self.tcps)>0 ,"接入数据不能为空"
+        self.startTimes=[]
+        for tcp in self.tcps:
+            self.startTimes.append(tcp.end)
+    def stopRecord(self):
+        self.finish()
+        return "实验结束"
     def getMinEnd(self):
         minv=100000000
         for tcp,startTime in zip(self.tcps,self.startTimes):

@@ -12,10 +12,6 @@ from flask_socketio import SocketIO, emit
 from myresponse import success,fail
 import scipy.io as scio
 
-# 线程通信
-global fos_flag
-fos_flag = 0
-
 # 兼容了两台不同的neuroscan
 # 可以发送消息给计算机视觉模块
 class TCPParser(Thread):
@@ -42,7 +38,7 @@ class TCPParser(Thread):
         self.data_len = 0
         self.event_msg = []
         self.half_save = save_len
-        self.save_path = './data'
+        self.save_path = './data/'
         self.save_filename = 'neuroscan_data'
         self.global_buffer = np.zeros((self.half_save * 2, 64)).astype(np.float32)   # 只存储64通道数据
         self.global_events = np.zeros((self.half_save * 2)).astype(np.float32)
@@ -58,9 +54,6 @@ class TCPParser(Thread):
         self.tcp_client = None
         self.tcp_end = 0
         self.concurrent = True  # 避免tcp_end还没到最后，但是end已经回到了零点
-        self.reset_end = 190000  # RSVP范式重置游标
-        self.session_end = 160000  # RSVP范式中每个session对应的时间戳
-        self.rest_time = False   # RSVP中间的休息时间
 
     def set_save_params(self, path='./data', filename='neuroscan_data'):
         self.save_path = path
@@ -107,6 +100,7 @@ class TCPParser(Thread):
         basic_bytes.dtype = '<i4'
         self.resolution = np.array(msg[24:28])
         self.resolution.dtype = np.float32
+        # self.resolution = 1
         self.channels = self.data_channels + self.event_channels
         self.data_len = int(self.channels * self.basic_samples * basic_bytes)
         print(f"待接收数据信息：脑电信号通道数为{self.data_channels}，事件信号通道数为{self.event_channels}，"
@@ -164,7 +158,6 @@ class TCPParser(Thread):
     def parse_data(self):
         iter_num = 1
         debug_num = 1
-        global fos_flag
         if self.tcp_status is False:
             print("TCP 尚未建立连接，Buffer建立失败！")
             return
@@ -223,13 +216,12 @@ class TCPParser(Thread):
             neuro_data = neuro_data.reshape((self.basic_samples, self.channels))
             events = neuro_data[:, self.event_chan]
             neuro_data = np.delete(neuro_data, self.event_chan, axis=1)
-            print("提前的数据部维度：", neuro_data.shape)
             target_mat = neuro_data * self.resolution
             self.global_buffer[self.end: self.end + self.basic_samples, :] = target_mat[:, :64]
             self.global_events[self.end: self.end + self.basic_samples] = events
             self.end += self.basic_samples
 
-        print("开始存储数据，当前时间点：", time.time())
+        print("开始存储数据，当前时间点：", time.time())   # 只要neuroscan那边点了播放，就开始存
         while self.data_status:
             if iter_num % 2 == 1: recv_len = 12
             else: recv_len = self.data_len  # 固定的40ms的数据，69*40
@@ -268,16 +260,12 @@ class TCPParser(Thread):
                 # 事件buffer
                 self.global_events[self.end: self.end + self.basic_samples] = events
                 self.end += self.basic_samples
+                # print(self.end)
                 # 通过均值来判断同步的延迟
                 # mean_t = np.mean(target_mat[:, 39])
                 # if mean_t < 0: print("normal")
                 # else: print("test")
-                if self.end >= self.reset_end:   # RSVP范式，一个session结束后重置游标，新数据覆盖前一段即可
-                    self.end = 0
-                    self.rest_time = False
-                if self.rest_time is False and self.end >= self.session_end:
-                    self.rest_time = True
-                    fos_flag = 1
+
                 # 循环队列优化数组申请过大问题
                 if self.end == self.half_save * 2:  # 循环队列到达末尾
                     self.end = 0

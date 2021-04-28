@@ -471,6 +471,8 @@
         var data_aug = $(".select-aug").val();
         var save_mat = $('#is_save_mat').prop('checked');
         var code = 0
+        console.log(JSON.stringify(channels))
+        console.log(data_aug)
         httpRequest(base_host+"api/createFilter",
             {"low":low, "high": high, "sampleRate": down_samples, "channels": JSON.stringify(channels),"dataAug":data_aug, "dataSave": save_mat},
             'GET', function () {code = 1}, false
@@ -537,7 +539,7 @@
         $(".aug-text").css("width",$(".resize-aug").width());
         $(".chosen-select").chosen({});
     }
-        function addValue() {
+    function addValue() {
         value = value * 2
         $(".nowValue").text(value)
     }

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>在线测试</title>
+    <script type="text/javascript" src="./echarts/echarts.min.js"></script>
+    <script type="text/javascript" src="./echarts/echarts-gl.min.js"></script>
+    <script type="text/javascript" src="./echarts/ecStat.min.js"></script>
+    <script type="text/javascript" src="./echarts/dataTool.min.js"></script>
+    <script type="text/javascript" src="./echarts/china.js"></script>
+    <script type="text/javascript" src="./echarts/world.js"></script>
+    <script type="text/javascript" src="./echarts/bmap.min.js"></script>
+    <script src="./js/jquery-plugins.js"></script>
+    <link href="./css/bootstrap-3.3.4.css" rel="stylesheet"/>
+    <link href="./css/uploadifive.css" rel="stylesheet" />
+    <link href="./css/online.css" rel="stylesheet"/>
+    <link href="./css/doc-08164a0eeb.css" rel="stylesheet">
+    <link href="./css/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="./css/animate.css" rel="stylesheet">
+    <link href="./css/style_form.css" rel="stylesheet">
+    <link href="./css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="./css/plugins/chosen/chosen.css" rel="stylesheet">
+    <link href="./css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
+    <link/>
+    <style>
+        html, body {
+            background-color: rgb(245, 245, 245);
+        }
+        body {
+            height: 950px;
+        }
+
+        .left-container {
+            background-color: rgb(253, 253, 253);
+            width: 40%;
+            min-height: 650px;
+            margin-left: 7%;
+            border: none;
+            font-family: -apple-system, BlinkMacSystemFont, PingFang SC, Helvetica, Tahoma, Arial, Hiragino Sans GB, Microsoft YaHei, "\5FAE\8F6F\96C5\9ED1", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            height: auto !important;
+            box-shadow: 0 1px 5px #ddd;
+            float: left;
+            position: relative;
+        }
+
+        .right-container {
+            width: 40%;
+            height: 650px;
+            float: right;
+            margin-right: 7%;
+            box-shadow: 0 1px 5px #ddd;
+            padding: 28px 32px;
+        }
+
+        .console-title {
+            color: #777;
+            font-size: 25px;
+            border-bottom: 1px solid #BBB;
+            padding-bottom: 16px;
+            width: 100%;
+            display: block;
+            margin-bottom: 30px;
+        }
+
+        .console-body {
+            height: 510px;
+            overflow-y: scroll;
+        }
+
+        .console-body span {
+            display: block;
+            font-family: '微软雅黑';
+            margin-bottom: 2px;
+        }
+
+        .console-body::-webkit-scrollbar {
+            display: none;
+        }
+
+        .canvas-eeg::-webkit-scrollbar {
+            display: none;
+        }
+        
+        #form1 {
+            width: 78%;
+            left: 9%;
+            background-color: rgb(253, 253, 253);
+            position: absolute;
+            z-index: 999;
+            padding: 32px;
+        }
+        
+        #form2 {
+            width: 78%;
+            left: 150px;
+            background-color: rgb(253, 253, 253);
+            position: absolute;
+            opacity: 0;
+            padding: 32px;
+            display: none;
+        }
+
+        #form3 {
+            width: 85%;
+            left: 150px;
+            background-color: rgb(253, 253, 253);
+            position: absolute;
+            opacity: 0;
+            padding: 32px;
+            display: none;
+        }
+        h2 {
+            font-family: "微软雅黑";
+            font-weight: 400;
+        }
+
+        .chosen-container-multi .chosen-choices li.search-choice {
+            background: #f1f1f1;
+            border: 1px solid #ededed;
+            border-radius: 2px;
+            box-shadow: none;
+        }
+
+        .icon-btn {
+            margin-left:1.3%;
+            box-shadow: 0 1px 5px #ddd;
+            margin-top: 300px;
+            width: 50px;
+            height: 50px;
+            float: left;
+            border-radius: 25px;
+            padding-left: 14px;
+            padding-top: 8.5px;
+            background-color: rgb(249, 249, 249);
+            z-index: 99999;
+        }
+
+        .icon-btn:hover {
+            background-color: rgb(245, 245, 245);
+        }
+
+        .icon-run {
+            font-size: 27px;
+            color: rgb(55,138,62);
+            margin-top:1px;
+        }
+
+        .canvas-eeg {
+            width: 100px;
+            height: 650px;
+            overflow-y: scroll;
+            float: left;
+            background-color: rgb(252,252,253);
+            /*background-color: rgb(252,0,0);*/
+            display: none;
+        }
+
+        .adjust-value {
+            width: 40%;
+            min-height: 70px;
+            margin-left: 7%;
+            height: auto !important;
+            float: left;
+            position: relative;
+            display: none;
+        }
+
+        .down-scroll {
+            width: 9.8%;
+            min-height: 70px;
+            height: auto !important;
+            float: right;
+            position: relative;
+        }
+
+        .down-scroll-icon {
+            background-color: rgb(150,150,150);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+<div style="position: relative; padding-top:20px;">
+    <img src="./img/BCI_title1.jpg"
+         style="border-bottom: 1px solid #E0DCDD; width: 800px; height:auto; margin-left: 7%; margin-top:20px; padding-bottom:20px;margin-bottom: 45px;">
+</div>
+<div class="left-container">
+    <form id="form1" class="form-horizontal">
+        <h2>实验参数设置 </h2>
+        <div class="hr-line-dashed"></div>
+        <a class="hasConnect"></a>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">连接名</label>
+            <div class="col-sm-10"><input type="text" class="form-control param1" value="被试1"></div>
+        </div>
+        <div class="form-group"><label class="col-sm-2 control-label">IP地址</label>
+            <div class="col-sm-10"><input type="text"class="form-control param2" value="10.1.25.96"></div>
+        </div>
+        <div class="form-group"><label class="col-sm-2 control-label">端口号</label>
+            <div class="col-sm-10"><input type="text" class="form-control param3" value="4000"></div>
+        </div>
+
+        <div class="hr-line-dashed"></div>
+
+        <div class="form-group">
+            <div class="col-sm-12">
+                <div class="pull-right" style="margin-right: 15px;">
+                    <button class="btn btn-primary step1" type="button" onclick="showData()">显示波形</button>
+                </div>
+                <div class="pull-right">
+                    <button class="btn btn-primary step4" type="button" onclick="stopExperiment()">结束实验</button>
+                </div>
+                <div class="pull-right" style="margin-right: 15px;">
+                    <button class="btn btn-primary step3" type="button" onclick="startExperiment()">开始实验</button>
+                </div>
+                <div class="pull-right" style="margin-right: 15px;">
+                    <button class="btn btn-primary step2" type="button" onclick="startTcp()">开始采集</button>
+                </div>
+                <div class="pull-right" style="margin-right: 15px;">
+                    <button class="btn btn-primary step1" type="button" onclick="startCollection()">建立连接</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="icon-container" style="width:6%;float:left;padding-left:10px;">
+    <div class="btn btn-defaul icon-btn icon-run-app" disabled="disabled">
+        <span class="glyphicon glyphicon-forward icon-run"></span>
+    </div>
+</div>
+<div class="right-container">
+    <span class="console-title">Console Outputs</span>
+    <div class="console-body">
+    </div>
+</div>
+
+
+<div class="down-scroll">
+    <span class="glyphicon glyphicon-sort-by-attributes-alt btn btn-default down-scroll-icon"></span>
+</div>
+<div id="container" style="height:280px;width: 93%;padding-left:7%; padding-top:40px;float:left;"></div>
+
+<div class="adjust-value">
+    <input value="+" type="button" class="btn btn-default" onclick="addValue()"/>
+    <input value="-" type="button" class="btn btn-default" onclick="subValue()"/>
+    <span class="nowValue">50</span>
+</div>
+
+<script src="./js/jquery.uploadifive.js"></script>
+<script type="text/javascript" src="./echarts/echarts.min.js"></script>
+<script type="text/javascript" src="./echarts/echarts-gl.min.js"></script>
+<script type="text/javascript" src="./echarts/ecStat.min.js"></script>
+<script type="text/javascript" src="./echarts/dataTool.min.js"></script>
+<script type="text/javascript" src="./echarts/china.js"></script>
+<script type="text/javascript" src="./echarts/world.js"></script>
+<script type="text/javascript" src="./echarts/bmap.min.js"></script>
+<script src="./js/layer-plug/layer.js"></script>
+<script src="./js/plugins/chosen/chosen.jquery.js"></script>
+<!--<script src="./js/plugins/dropzone/dropzone.js"></script>-->
+<script src="./js/plugins/iCheck/icheck.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+
+<script>
+    var ws;
+    function WebSocketTest() {
+        if ("WebSocket" in window) {
+           ws = new WebSocket("ws://10.1.25.96:9998");
+           ws.onopen = function(){
+              ws.send("admin:123456");
+           };
+           ws.onmessage = function (evt) {
+              var received_msg = evt.data;
+           };
+           ws.onclose = function(){
+              alert("连接已关闭...");
+           };
+        }else{
+           alert("您的浏览器不支持 WebSocket!");
+        }
+     }
+     //WebSocketTest()    //在采集数据的时候才需要打开，还有下面的ws.send()
+</script>
+
+<script>
+    trials_per_session = 50
+    rest_time = 20
+    pre_training = true
+    sample = 1
+    right_sample = 0
+    function ws_conn(){
+        var socket = io();
+        socket.on('my_response', function(msg, cb) {
+            console.log(msg)
+            msg = JSON.parse(msg)
+            if (msg.data.sessions != undefined) {
+                console_log("预训练中：session("+msg.data.sessions+")，trial("+msg.data.trials+")")
+            } else if (pre_training == true && msg.data.finish == 1) {
+                pre_training = false  // bug1：session2也会过来
+                console_log("模型构建中...")
+            } else if ( msg.data.predict != undefined) {
+                var res = "错误"
+                if (msg.data.predict == msg.data.true) {
+                    res = "正确"
+                    right_sample = right_sample + 1
+                }
+                console_log("在线测试：第"+sample+"个样本，预测类别为"+msg.data.predict+"，预测"+res+"，当前正确率："+
+                    parseInt(right_sample*100/sample) + "%")
+                sample = sample + 1
+            }
+            if (sample % trials_per_session == 0) {
+                now_session = parseInt(sample/trials_per_session)
+                setTimeout(function () {
+                    console_log("已经过"+now_session+"个实验，休息"+rest_time+"秒")
+                }, 1000)
+            }
+            if (cb)
+                cb();
+        });
+    }
+</script>
+<script>
+    option = null;
+    var ch_names;
+    var showLength = 1000;
+    var nowFos = 0;
+    var indata = Array.from({length:2},x=>Array.from({length:showLength}, y=>0));
+    var newdata = [];
+    var timeend = -1;
+    scroll_down = true;
+    var ch_names = ['S1','S2'];
+    value1 = 50
+	value2 = 50
+    //dom = document.getElementById("container");
+    //myChart = echarts.init(dom);
+	var base_host = "http://localhost:10086/";
+    function refresh() {
+        var grids = [];
+        var xAxes = [];
+        var yAxes = [];
+        var series = [];
+        var titles = [];
+        var count = 0;
+        var end_Fos = 0;
+		echarts.util.each(indata,
+        function(line) {
+            var length = newdata[count].length; //新的数据
+            //var i_mod = 0
+            //for (var i = nowFos; i < nowFos + length; i++) {
+            //    i_mod = i % showLength;
+			//	line[i_mod] = newdata[count][i - nowFos]
+            //}
+            //end_Fos = (nowFos + length) % showLength
+            //console.log("结束位置："+end_Fos)
+            //line = line.slice(length);
+            //line = line.concat(newdata[count]);   // 连接到最后一段
+			line = line.slice(0, line.length - length)
+			line = newdata[count].concat(line)
+            indata[count] = line;
+            grids.push({
+                show: true,
+                borderWidth: 0,
+                backgroundColor: 'rgb(252,252,252)'
+            });
+            xAxes.push({
+                type: 'category',
+                show: false,
+                gridIndex: count,
+            });
+            yAxes.push({
+                type: 'value',
+                show: false,
+                min: -value1,
+                max: value2,
+                gridIndex: count
+            });
+            series.push({
+                name: '',
+                type: 'line',
+                xAxisIndex: count,
+                yAxisIndex: count,
+                data: line,
+                showSymbol: false,
+                smooth: false,
+            });
+            titles.push({
+                textAlign: 'center',
+                text: ch_names[count],
+                textStyle: {
+                    fontSize: 12,
+                    fontWeight: 'normal'
+                }
+            });
+            count++;
+        });
+        nowFos = end_Fos
+        var lineheight = Math.ceil(100 / count) + '%';
+        echarts.util.each(grids,
+        function(grid, idx) {
+            grid.left = '0%';
+            grid.top = Math.ceil(100 / count) * idx + '%';
+            grid.width = '100%';
+            grid.height = lineheight;
+            titles[idx].left = '1%';
+            titles[idx].top = parseFloat(grid.top) + '%';
+        });
+        option = {
+            title: titles,
+            grid: grids,
+            xAxis: xAxes,
+            yAxis: yAxes,
+            series: series
+        };
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    }
+     function isInteger(obj){
+
+         return typeof obj === 'number' && obj%1 === 0;      //是整数，则返回true，否则返回false
+
+    }
+    function getdata() {
+		$.ajax({
+			url: base_host + "api/getdatamean",
+			contentType:"application/x-www-form-urlencoded; charset=UTF-8",
+			type: 'get',
+			data: {
+				'timeend':timeend
+			}, async: true,
+			success: function(dat) {
+				dat = JSON.parse(dat);
+				var data = dat['data'];
+				if(!isInteger(data['timeend']))return;
+				timeend = data['timeend'];
+				newdata = data['data'];
+				//console.log(typeof (indata[0][0]))#
+				ch_names = data['ch_names'];
+				console.log(timeend);
+				if(newdata.length>0 && newdata[0].length>0)
+					refresh();
+			},
+			error:function(){
+			}
+		});
+    }
+</script>
+<script>
+    var base_host = "http://localhost:10086/";
+    function defaultParams() {
+        httpRequest(base_host+"api/createExperiment",
+                {"sessions":10, "trials": 50, "interval": 1000, "duration": 1000, "tmin": 0, "tmax":1000, "device":1, "fitsessions":1},
+                'GET', function (data) {data = JSON.parse(data); if (data.code == "0") {console.log("创建实验成功")}}, false
+            )
+        httpRequest(base_host+"api/createFilter",
+            {"low":1, "high": 40, "sampleRate": 1000, "channels": '["FZ","FC1","FC2","C3","CZ","C4","CP1","CP2","P7","P3","PZ","P4","P8","O1","OZ","O2"]'},
+            'GET', function (data) { data = JSON.parse(data); if (data.code == 0) { console.log("创建滤波器成功") }}, false
+        )
+    }
+    function startTcp() {
+        httpRequest(base_host+"api/startTcp", {},
+            'GET', function (data) {
+                data = JSON.parse(data)
+                if (data.code != "0") {
+                    layer.msg("TCP开始失败");
+                } else {
+                    layer.msg("已开始数据解析，可以点击neuroscan的播放按钮");
+                }
+            }, false
+        )
+    }
+    function startExperiment() {
+        //ws.send("stm");
+        httpRequest(base_host+"api/startRecord", {},
+            'GET', function (data) {
+                data = JSON.parse(data)
+                if (data.code != "0") {
+                    layer.msg("开始实验出错");
+                } else {
+                    layer.msg("已开始实验");
+
+                }
+            }, false
+        )
+    }
+    function showData(){
+        loopId = setInterval(getdata, 160);
+    }
+    function stopExperiment() {
+        httpRequest(base_host+"api/stopRecord", {},
+            'GET', function (data) {
+                data = JSON.parse(data)
+                if (data.code != "0") {
+                    layer.msg("结束实验出错");
+                } else {
+                    layer.msg("已成功保存数据");
+                }
+            }, false
+        )
+    }
+    function startCollection() {
+        var param1 = $(".param1").val()
+        var param2 = $(".param2").val()
+        var param3 = $(".param3").val()
+        if (param1!="" && param2!="" && param3!="") {
+            httpRequest(base_host+"api/createTcp", {"host": param2, "port": param3, "tcpname": param1},
+                'GET', function (data) {
+                    data = JSON.parse(data)
+                    console.log(data)
+                    if (data.code != "0") {
+                        layer.msg("TCP连接失败，请检查Neuroscan是否已经打开");
+                        //console_log(data.data)
+                        return
+                    } else {
+                        if ($(".hasConnect").text()!="") {
+                             $(".hasConnect").append("、")
+                        }
+                        $(".hasConnect").append(param1 + "(" +param2 + ":" + param3 + ")");
+                        layer.msg("TCP连接成功，可以继续创建下一个连接");
+                        $(".param1").val("");$(".param2").val("");$(".param3").val("");
+                    }
+                }, false
+            )
+        }
+    }
+    function addValue() {
+        value = value * 2
+        $(".nowValue").text(value)
+    }
+    function subValue() {
+        value = value / 2
+        $(".nowValue").text(value)
+    }
+    function getCurrentTime() {
+        var now = new Date();
+        var year = now.getFullYear(); //得到年份
+        var month = now.getMonth();//得到月份
+        var date = now.getDate();//得到日期
+        var day = now.getDay();//得到周几
+        var hour = now.getHours();//得到小时
+        var minu = now.getMinutes();//得到分钟
+        var sec = now.getSeconds();//得到秒
+        month = month + 1;
+        if (month < 10) month = "0" + month;
+        if (date < 10) date = "0" + date;
+        if (hour < 10) hour = "0" + hour;
+        if (minu < 10) minu = "0" + minu;
+        if (sec < 10) sec = "0" + sec;
+        var time = year + "-" + month + "-" + date+ " " + hour + ":" + minu + ":" + sec;
+        return time;
+    }
+
+$(document).ready(function () {
+
+    /*    function ws_conn() {
+            var ws_url = "ws://localhost:10086/ws/startExperiment"
+            ws = new WebSocket(ws_url)
+            ws.onmessage=function (serv_msg) {
+                console.log("test:" + serv_msg.data)
+            }
+            ws.onopen=function (msg) {
+                console.log(JSON.stringify(msg))
+            }
+        }
+    */
+    defaultParams()
+    $(".icon-container").css("padding-left", ($('html').width() * 0.06 - 50)/2)
+<!--    $(".canvas-eeg").css({"width": $('html').width() * 0.8})-->
+<!--    $("#container").css({"width": $('html').width() * 0.8})-->
+    dom = document.getElementById("container");
+    myChart = echarts.init(dom);
+    newdata=Array.from({length:2},x=>Array.from({length:showLength}, y=>0));
+    refresh();
+    $('.i-checks').iCheck({
+        checkboxClass: 'icheckbox_square-green',
+        radioClass: 'iradio_square-green',
+    });
+    $(".step5").click(function () {
+        //return true
+        httpRequest(base_host+"api/createTcp",  {"host":param1, "port": param2, "tcpname": param3},
+                'GET', function (data) {
+                    data = JSON.parse(data)
+                    if (data.code != "0") {
+                        layer.msg("TCP连接失败，请检查Neuroscan是否已经打开");
+                        console_log(data.data)
+                        return
+                    }
+                }, false
+            )
+        httpRequest(base_host+"api/startTcp", {},
+            'GET', function (data) {
+                data = JSON.parse(data)
+                if (data.code != "0") {
+                    layer.msg("TCP开始失败，请查看控制台输出");
+                    console_log(data.data)
+                    return
+                }
+            }, false
+        )
+        httpRequest(base_host+"api/createClassfier", {},
+            'GET', function (data) {
+                data = JSON.parse(data)
+                if (data.code == "0") {
+                    $("#form3").animate({left: '-150px', opacity: '0'});
+                    setTimeout(function () {
+                        $("#form3").css({'display': 'none'})
+                        $(".canvas-eeg").fadeIn(100)
+                        $(".adjust-value").fadeIn(100)
+                        $(".down-scroll-icon").fadeIn(100)
+                    }, 300)
+                    layer.msg("模型构建中...")
+                    $('.icon-btn').attr("disabled",false);
+                } else {
+                    layer.msg("模型构建失败，请查看错误日志");
+                    console_log(data.data)
+                    return
+                }
+            }, false
+        )
+    })
+
+    $(document).on("keydown", function(e) {   //开始实验
+		if (e.which === 38) {
+			value1 = value1 * 2;
+		}
+		if (e.which === 40) {
+			value1 = value1 / 2;
+		}
+		if (e.which === 37) {
+			value2 = value2 * 2;
+		}
+		if (e.which === 39) {
+			value2 = value2 / 2;
+		}
+	});
+
+});
+
+</script>
+
+</body>
+</html>
