@@ -346,15 +346,6 @@
 		echarts.util.each(indata,
         function(line) {
             var length = newdata[count].length; //新的数据
-            //var i_mod = 0
-            //for (var i = nowFos; i < nowFos + length; i++) {
-            //    i_mod = i % showLength;
-			//	line[i_mod] = newdata[count][i - nowFos]
-            //}
-            //end_Fos = (nowFos + length) % showLength
-            //console.log("结束位置："+end_Fos)
-            //line = line.slice(length);
-            //line = line.concat(newdata[count]);   // 连接到最后一段
 			line = line.slice(0, line.length - length)
 			line = newdata[count].concat(line)
             indata[count] = line;
@@ -430,6 +421,8 @@
 				'timeend':timeend
 			}, async: true,
 			success: function(dat) {
+<!--			    setTimeout("getdata()", 160);-->
+                getdata();
 				dat = JSON.parse(dat);
 				var data = dat['data'];
 				if(!isInteger(data['timeend']))return;
@@ -485,7 +478,9 @@
         )
     }
     function showData(){
-        loopId = setInterval(getdata, 160);
+<!--        loopId = setInterval(getdata, 160);-->
+        getdata();
+        setTimeout("getdata()", 160);
     }
     function stopExperiment() {
         httpRequest(base_host+"api/stopRecord", {},

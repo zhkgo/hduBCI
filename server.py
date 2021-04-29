@@ -277,19 +277,19 @@ def getDataMean():
     # print("TCP END WHEN GET DATA",experiment.tcp.end)
     try:
         timeend = int(request.args.get('timeend'))
-        arr, rend = experiment.getData(timeend,windows=1000,tcpid=-1)
+        arr, rend = experiment.getData(timeend,windows=1000,tcpid=-1,median=True,normalize=True)
         # print(arr.tolist())
     except Exception as e:
         traceback.print_exc()
         return fail(str(e))
     #TESTBEGIN
-    lchs=len(experiment.channels) #单机测试双脑 所以除以2 正常情况不除
+    # lchs=len(experiment.channels) #单机测试双脑 所以除以2 正常情况不除
     #TESTEND
-    arr1=arr[:lchs].mean(axis=0)
-    arr2=arr[lchs:].mean(axis=0)
-    ls=np.vstack([arr1, arr2]).tolist()
+    # arr1=arr[:lchs].mean(axis=0)
+    # arr2=arr[lchs:].mean(axis=0)
+    # ls=np.vstack([arr1, arr2]).tolist()
     # print(arr.shape)
-    return success({"data":ls, 'ch_names': ['S1','S2'], 'timeend': rend})
+    return success({"data":arr.tolist(), 'ch_names': ['S1','S2'], 'timeend': rend})
 
 @app.route('/api/getdata')
 def getdata():

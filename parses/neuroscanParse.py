@@ -260,7 +260,7 @@ class TCPParser(Thread):
                 # 事件buffer
                 self.global_events[self.end: self.end + self.basic_samples] = events
                 self.end += self.basic_samples
-                # print(self.end)
+                # print(self.name+str(self.end))
                 # 通过均值来判断同步的延迟
                 # mean_t = np.mean(target_mat[:, 39])
                 # if mean_t < 0: print("normal")

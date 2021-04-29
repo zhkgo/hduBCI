@@ -22,7 +22,11 @@ class Experiment:
         self.done=False
         self.tcpThread = []
         self.windows=1000
-        
+
+        #均值标准差用于修正波形显示
+        self.means=None
+        self.sigmas=None
+
         self.fitSessions=0
         self.startTimes=[] #实验开始时间 对于不同TCP连接 开始的点可能不同 单位ms
         self.sessions=0 #session数量 
@@ -107,7 +111,7 @@ class Experiment:
     # 返回滤波后数据和数据截止时间点
     #数据格式为 channels*times
     # 如果tcpid=-1 则返回全部按通道叠加后的数据，否则返回对应通道的数据
-    def getData(self,startpos:int,windows=1000,tcpid=0):
+    def getData(self,startpos:int,windows=1000,tcpid=0,median=False,normalize=False):
         assert len(self.tcps)>0,"请先设置TCP"
         if tcpid!=-1:
             data,rend=self.tcps[tcpid].get_batch(self.startTimes[tcpid]+startpos if startpos> -1 else -1, maxlength=windows)
@@ -132,7 +136,15 @@ class Experiment:
             totdata[i]=totdata[i][:,:minl]
             # print("totdata:",end='')
             # print(totdata[i].shape)
+            if median:
+                totdata[i]=np.median(totdata[i],axis=0,keepdims=True)
         totdata = np.concatenate(totdata,axis=0)
+        if normalize:
+            if self.means is None:
+                self.means=np.mean(totdata,axis=1,keepdims=True)
+            if self.sigmas is None:
+                self.sigmas=np.std(totdata,axis=1,keepdims=True)
+            totdata=(totdata-self.means)/self.sigmas
         print("Experimrnt return rend:", totrend)
         return totdata,int(totrend)
 
