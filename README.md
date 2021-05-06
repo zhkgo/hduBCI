@@ -9,5 +9,5 @@ hduBCI for connect device、algorithm、application
 - ~~前端页面美化~~
 - ~~后台代码优化~~
 - ~~多脑接入~~
-- 纯粹数据采集模块
+- ~~纯粹数据采集模块~~
 - 未完待续
