@@ -447,7 +447,7 @@
                 'GET', function (data) {data = JSON.parse(data); if (data.code == "0") {console.log("创建实验成功")}}, false
             )
         httpRequest(base_host+"api/createFilter",
-            {"low":1, "high": 40, "sampleRate": 1000, "channels": '["FZ","FC1","FC2","C3","CZ","C4","CP1","CP2","P7","P3","PZ","P4","P8","O1","OZ","O2"]'},
+            {"low":1, "high": 40, "sampleRate": 1000, "channels": '["FC1","FC2","C3","CZ","C4","CP1","CP2","CPZ"]'},
             'GET', function (data) { data = JSON.parse(data); if (data.code == 0) { console.log("创建滤波器成功") }}, false
         )
     }

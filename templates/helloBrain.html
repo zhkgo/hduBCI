@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>脑机协同视频检测</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <link  rel="stylesheet" href="https://unpkg.com/animate.css@3.5.2/animate.min.css"/>
+</head>
+<body>
+    <div id="app">
+    <el-row>
+        <el-col :span="18"><div style="margin-bottom: 50px;"><img src="img/BCI_title.jpg" width="800px"/></div></el-col>
+    </el-row>
+    <el-row>
+        <el-col id="videosToPlay" :span="4" style="border-radius: 30px;border-style: dashed;margin-right: 10px;">
+                <el-row style='text-align: center; font-weight:bolder;margin-bottom: 10px; font-size: 25px;'>
+                     相关目标踪迹<i class="el-icon-s-platform"></i>
+                </el-row>
+                <el-row :span="4"  v-for="(item,index) in items" v-bind:key="item.id" style="list-style:none; text-align: center; ">
+                    <video class="animated bounce" :id="item.id" :src="item.src" @loadstart="setCurrentTime(item.id,item.currentTime)"  @click="playthis(item.id,index)"
+                    @mousemove="mouseChange(item.id)" preload="meta" height="150px" style=" border:groove  black; " >
+                            your browser does not support the video
+                    </video>
+                </el-row>
+        </el-col>
+        <el-col :span="19">
+            <el-row style='margin-bottom: 10px; font-size: 25px;text-align: center; font-weight:bolder;'>
+                实时目标检测区<i class="el-icon-user-solid"></i>
+                    <el-button @click="recommend()" type="primary" round>脑电触发</el-button>
+           </el-row>
+           <el-row>
+            <video id="videoplayed" src="videos/DSC_0026.MOV"   width="100%" @keyUp="speedChange" controls="controls">
+                your browser does not support the video tag
+            </video>
+        </el-row>
+        </el-col>
+    </el-row>
+</div>
+</body>
+
+<script>
+
+var app=new Vue({
+    el: "#app",
+    data:{
+        items: [
+      {
+        id: "r1",
+        src: 'videos/DSC_0028.MOV',
+        currentTime: 10, },
+      { id: "r2",
+        src: 'videos/DSC_0027.MOV',
+        currentTime: 5.5,
+    },
+    { id: "r3",
+        src: 'videos/DSC_0050.MOV',
+        currentTime: 2.5,
+    },
+    { id: "r4",
+        src: 'videos/DSC_0027.MOV',
+        currentTime: 1.5,
+    },{ id: "r5",
+        src: 'videos/DSC_0051.MOV',
+        currentTime: 139,
+    },
+    ],
+    speedId: 3,
+    speedList:[
+           0.25,0.5,0.75,1,2,4,6,8,10
+    ]
+    },
+    methods:{
+    setCurrentTime(id,currentTime){
+            obj=document.getElementById(id);
+            obj.currentTime=currentTime;
+        },
+    playthis(id,i){
+        toPlay=document.getElementById(id);
+        played=document.getElementById("videoplayed");
+        tsrc=played.src;
+        tcurrentTime=played.currentTime;
+        played.src=this.items[i].src;
+        played.currentTime=this.items[i].currentTime;
+        played.play();
+        played.focus();
+        played.playbackRate=1;
+        this.speedId=3;
+        this.items[i].src=tsrc;
+        this.items[i].currentTime=tcurrentTime;
+        this.$notify({title:"成功",message:"已跳转到目标所在时间点",type:"success"})
+        //发送请求 表示正在观看的视频已变化
+    },
+    mouseChange(id){
+        obj=document.getElementById(id);
+        obj.style.cursor="pointer";
+    },
+    speedUp(obj){
+            if(this.speedId+1<this.speedList.length){
+                this.speedId+=1
+            }else{
+                return false;
+            }
+            //console.log(this.speedId);
+            obj.playbackRate = this.speedList[this.speedId];
+            return true;
+        },
+    speedDown(obj){
+            if(this.speedId-1>=0)
+                this.speedId-=1
+			else
+				return false;
+            //console.log(this.speedId);
+            obj.playbackRate = this.speedList[this.speedId];
+			return true;
+        },
+    speedChange(e){
+			if(e.keyCode!=83 && e.keyCode!=68){
+				return ;
+			}
+            obj=document.getElementById("videoplayed");
+            res=true
+            if(e.keyCode==83){
+                res=this.speedUp(obj);
+            }else if(e.keyCode==68){
+                res=this.speedDown(obj);
+            }
+            if(res)
+                this.$notify({title:"成功",message:"当前视频播放速度"+obj.playbackRate,type:"success"})
+            else
+                this.$notify({title:"注意",message:"当前视频播放速度为"+obj.playbackRate+"，已达极限。",type:"warning"})
+    },
+    recommend(){
+        this.$notify({title:"相关目标推荐",message: "目标1" ,type:"success"})
+    }
+  }
+});
+
+
+</script>
+
+</html>

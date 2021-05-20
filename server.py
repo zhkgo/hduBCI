@@ -47,7 +47,9 @@ def WithThread(obj):
         t.start()
 
     return Threads
-
+@app.route('/helloBrain')
+def helloBrain():
+    return render_template("helloBrain.html")
 @app.route('/datashow')
 def dataShow():
     return  render_template("dataShow.html")

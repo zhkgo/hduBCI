@@ -325,26 +325,26 @@ class TCPParser(Thread):
                     self.concurrent = True
                 print("当前游标：", self.end)
         tcp_client.close()
+'''
 
+if __name__ == '__main__':
+    thread_acquire = TCPParser("第一个Scan", host="192.168.31.60")  # 局域网10.1.25.42
+    thread_acquire.start()
 
-# if __name__ == '__main__':
-#     thread_acquire = TCPParser("第一个Scan", host="10.1.25.96")  # 局域网10.1.25.42
-#     thread_acquire.start()
-#
-#     # thread_acquire1 = TCPParser("第二个Scan", host="10.1.25.96")  # 10.1.25.42
-#     # thread_acquire1.start()
-#
-#     while True:
-#         line = input()
-#         if line == "7":
-#             break
-#     thread_acquire.startTcp()
-#     # thread_acquire1.startTcp()
-#     # thread_acquire.message_queue()
-#     print("数据开始传输")
-#     start_t = time.time()
-#     # time.sleep(3)
-#     thread_acquire.get_batch(-1, 1000)
+    thread_acquire1 = TCPParser("第二个Scan", host="192.168.31.228")  # 10.1.25.42
+    thread_acquire1.start()
+
+    while True:
+        line = input()
+        if line == "7":
+            break
+    thread_acquire.startTcp()
+    thread_acquire1.startTcp()
+    # thread_acquire.message_queue()
+    # print("数据开始传输")
+    # start_t = time.time()
+    # # time.sleep(3)
+    # thread_acquire.get_batch(-1, 1000)
     # while True:
     #     time.sleep(0.5)
     #     if fos_flag == 1 and thread_acquire.get_buffer_fos() >= 160000 and thread_acquire1.get_buffer_fos() >= 160000:
@@ -352,11 +352,13 @@ class TCPParser(Thread):
     #         # 获取两个线程对应的数据并进行预测处理，同时把预测的结果发送给计算机视觉
     #         print("模拟数据通信，时差", time.time()-start_t)
     #         start_t = time.time()
-
+    #
     # eegs = thread_acquire.get_batch(38, 1000)
     # chans = thread_acquire.get_channels_name()
     # print(eegs.shape)
     # for i in range(10, 14):
     #     print(chans[i], " : ", eegs[i, 50:60])
     # time.sleep(8)
-    # thread_acquire.close()
+    thread_acquire.close()
+    thread_acquire1.close()
+'''
