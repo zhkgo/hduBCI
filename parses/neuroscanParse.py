@@ -9,10 +9,10 @@ from threading import Thread
 import threading
 from scipy.io import savemat
 from flask_socketio import SocketIO, emit
-from myresponse import success,fail
 import scipy.io as scio
 
 # 兼容了两台不同的neuroscan
+# 兼容了32通道的neuroscan
 # 可以发送消息给计算机视觉模块
 class TCPParser(Thread):
     def __init__(self, name="neuroscan", host="127.0.0.1", port=4000, save_data=False, save_len=9000000):  # 可以通过初始化来传递参数
@@ -42,7 +42,10 @@ class TCPParser(Thread):
         self.save_filename = 'neuroscan_data'
         self.global_buffer = np.zeros((self.half_save * 2, 64)).astype(np.float32)   # 只存储64通道数据
         self.global_events = np.zeros((self.half_save * 2)).astype(np.float32)
-        self.event_chan = 41   # 事件通道
+        self.event_chan_32 = 36   # 事件通道
+        self.event_chan_64 = 41
+        self.convert = [0, 2, 5, 7, 9, 11, 13, 14, 16, 18, 20, 22, 1, 25, 27, 29, 3, 33, 35, 37, 39, 41, 4, 6,
+                        45, 47, 49, 8, 10, 60, 61, 62,15,17,19,23]
         self.save_fos = 1   # 文件保存的命名
         self.end = 0
         self.channel_names = ['FP1', 'FPZ', 'FP2', 'AF3', 'AF4', 'F7', 'F5', 'F3', 'F1', 'FZ', 'F2', 'F4', 'F6', 'F8',
@@ -214,10 +217,18 @@ class TCPParser(Thread):
             neuro_data = np.array([recv_extra_data[i:i + 4] for i in range(0, self.data_len, 4)])
             neuro_data.dtype = '<i4'
             neuro_data = neuro_data.reshape((self.basic_samples, self.channels))
-            events = neuro_data[:, self.event_chan]
-            neuro_data = np.delete(neuro_data, self.event_chan, axis=1)
+            events=None
+            if self.data_channels > 40:
+                events = neuro_data[:, self.event_chan_64]
+                neuro_data = np.delete(neuro_data, self.event_chan_64, axis=1)
+            else:
+                events = neuro_data[:, self.event_chan_32]
+                neuro_data = np.delete(neuro_data, self.event_chan_32, axis=1)
             target_mat = neuro_data * self.resolution
-            self.global_buffer[self.end: self.end + self.basic_samples, :] = target_mat[:, :64]
+            if target_mat.shape[1] > 40:
+                self.global_buffer[self.end: self.end + self.basic_samples, :] = target_mat[:, :64]
+            else:
+                self.global_buffer[self.end: self.end + self.basic_samples, self.convert] = target_mat[:,:64]  # 64没有关系，取到32也可以的
             self.global_events[self.end: self.end + self.basic_samples] = events
             self.end += self.basic_samples
 
@@ -252,11 +263,19 @@ class TCPParser(Thread):
                 # 提取事件，删除对应列
                 # data是把4个int8合并成一个int32，而event只取第一个int8作为事件标记
                 # 在这里取的是int32，需要验证前24位是否全为0，全为0则正确
-                events = neuro_data[:, self.event_chan]    # (40, 1)
-                neuro_data = np.delete(neuro_data, self.event_chan, axis=1)
+                if self.data_channels > 40:
+                    events = neuro_data[:, self.event_chan_64]
+                    neuro_data = np.delete(neuro_data, self.event_chan_64, axis=1)
+                else:
+                    events = neuro_data[:, self.event_chan_32]
+                    neuro_data = np.delete(neuro_data, self.event_chan_32, axis=1)
                 target_mat = neuro_data * self.resolution
                 # 数据buffer
-                self.global_buffer[self.end: self.end + self.basic_samples, :] = target_mat[:, :64]
+                if target_mat.shape[1] > 40:
+                    self.global_buffer[self.end: self.end + self.basic_samples, :] = target_mat[:, :64]
+                else:
+                    self.global_buffer[self.end: self.end + self.basic_samples, self.convert] = target_mat[:,:64]  # 64没有关系，取到32也可以的
+                # print(target_mat)
                 # 事件buffer
                 self.global_events[self.end: self.end + self.basic_samples] = events
                 self.end += self.basic_samples
@@ -280,7 +299,7 @@ class TCPParser(Thread):
             start_fos = self.end - maxlength
         rend = min(self.end, start_fos + maxlength)
         eeg_data = self.global_buffer[start_fos:rend, :]
-        print(eeg_data.shape)
+        # print(eeg_data.shape)
         return eeg_data.T, int(rend)
 
     def get_buffer_fos(self):
@@ -301,7 +320,8 @@ class TCPParser(Thread):
 
     def saveData(self, startfos):
         print(f"保存{self.name}的数据")
-        savemat(self.save_path + self.name + '.mat',
+        ctime = time.strftime("%Y%m%d%H%M%S", time.localtime())
+        savemat(self.save_path + self.name + ctime+'.mat',
                 {'dat': self.global_buffer[: self.end], 'event': self.global_events[: self.end], "startfos": startfos})
         print(f"保存完成！")
 
@@ -325,12 +345,12 @@ class TCPParser(Thread):
                     self.concurrent = True
                 print("当前游标：", self.end)
         tcp_client.close()
+
+
+# if __name__ == '__main__':
+#     thread_acquire = TCPParser("第一个Scan", host="10.1.125.114")  # 局域网10.1.25.42
+#     thread_acquire.start()
 '''
-
-if __name__ == '__main__':
-    thread_acquire = TCPParser("第一个Scan", host="192.168.31.60")  # 局域网10.1.25.42
-    thread_acquire.start()
-
     thread_acquire1 = TCPParser("第二个Scan", host="192.168.31.228")  # 10.1.25.42
     thread_acquire1.start()
 

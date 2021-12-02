@@ -38,7 +38,7 @@ class TCPParser:  # The script contains one main class which handles Streamer da
         ctime=time.strftime("%Y%m%d%H%M%S",time.localtime())
         savepathlog="data/log"+ctime+".npy"
         savepathvalue="data/value"+ctime+".npy"
-        np.save(savepathlog,self.data_log)
+        #np.save(savepathlog,self.data_log)
         np.save(savepathvalue,self.signals[:self.end])
         
     def create_batch(self, ch_names, sampleRate=1000):
