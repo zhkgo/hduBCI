@@ -4,6 +4,7 @@ import threading
 import numpy as np
 import socket
 import time
+from scipy.io import savemat
 
 
 class DSIDevice:
@@ -22,6 +23,7 @@ class DSIDevice:
         self.data_log = b''
         self.port = port
         self.name = name
+        self.channel_names=['P3', 'C3', 'F3', 'Fz', 'F4', 'C4', 'P4', 'Cz', 'CM', 'A1', 'Fp1', 'Fp2', 'T3', 'T5', 'O1', 'O2', 'X3', 'X2', 'F7', 'F8', 'X1', 'A2', 'T6', 'T4', 'TRG']
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.host, self.port))
         self.end = 0
@@ -36,10 +38,13 @@ class DSIDevice:
         self.sock.connect((self.host, self.port))
         self.crate_batch(self.ch_names, self.sampleRate)
 
-    def saveData(self,name,startpos):
+    def saveData(self, startfos=0):
+        print(f"保存{self.name}的数据")
         ctime = time.strftime("%Y%m%d%H%M%S", time.localtime())
-        savepathvalue = "data/" + name +ctime+ ".npy"
-        np.save(savepathvalue, self.signals[:,startpos:self.end])
+        savemat(self.save_path + self.name + ctime+'.mat',
+                {'dat': self.signals[:,:self.end],'startfos': startfos,'channels':self.channel_names})
+        print(f"保存完成！")
+
 
     def create_batch(self,_=1,__=1):
         self.signals = np.zeros((24, 3600000))

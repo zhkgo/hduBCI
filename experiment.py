@@ -7,12 +7,19 @@ Created on Sat Nov 21 20:41:30 2020
 import threading
 import numpy as np
 import time
+from parses.neuracleParse import TCPParser as neuracleParse
+from parses.neuroscanParse import TCPParser as neuroscanParse
+from parses.dsiParse import DSIDevice as dsiParse
+
 class Experiment:
     def __init__(self):
         self.CHANNELS=[
             ['Fp1','Fp2','F3','F4','F7','F8','FC1','FC2','FC5','FC6','Cz','C3','C4','T7','T8','CP1','CP2','CP5','CP6','Pz','P3','P4','P7','P8','POz','PO3','PO4','PO5','PO6','Oz','O1','O2','ref'],#ref 参考电极
             ['FP1','FPZ','FP2','AF3','AF4','F7','F5','F3','F1','FZ','F2','F4','F6','F8','FT7','FC5','FC3','FC1','FCZ','FC2','FC4','FC6','FT8','T7','C5','C3','C1','CZ','C2','C4','C6','T8','M1','TP7','CP5','CP3','CP1','CPZ','CP2','CP4','CP6','TP8','M2','P7','P5','P3','P1','PZ','P2','P4','P6','P8','PO7','PO5','PO3','POZ','PO4','PO6','PO8','CB1','O1','OZ','O2','CB2'],
+            ['P3', 'C3', 'F3', 'Fz', 'F4', 'C4', 'P4', 'Cz', 'CM', 'A1', 'Fp1', 'Fp2', 'T3', 'T5', 'O1', 'O2', 'X3',
+             'X2', 'F7', 'F8', 'X1', 'A2', 'T6', 'T4', 'TRG'],
             ]
+        self.parses=[neuracleParse,neuroscanParse,dsiParse]
         self.tcps=[]
         self.classfier=None
         self.scaler=None
@@ -42,6 +49,8 @@ class Experiment:
         self.trainData=[]
         self.labels=[]
         # self.end=0
+    def getParse(self):
+        return self.parses[self.device]
     def finish(self):
         self.done=True
         self.stop_tcp()
@@ -86,7 +95,7 @@ class Experiment:
                 cur+=self.duration
             cur+=self.interval
         self.device=device
-        assert device<2,"设备编号应当小于2"
+        assert device<3,"设备编号应当小于3"
         self.device_channels=self.CHANNELS[self.device]
     #暂未重写 先留着 还没啥用处
     def restart_tcp(self):

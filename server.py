@@ -16,7 +16,6 @@ from bcifilter import BciFilter
 from experiment import Experiment
 from flask_socketio import SocketIO, emit
 import numpy as np
-from parses.neuroscanParse import TCPParser
 from myresponse import success,fail
 import importlib
 #from  gevent.pywsgi import WSGIServer
@@ -148,7 +147,6 @@ def createFilter():
     except Exception as e:
         traceback.print_exc()
         return fail(str(e))
-
     return success()
 
 #创建TCP连接
@@ -169,6 +167,7 @@ def createTcp():
             tcpname="neuroscan"
         else:
             port=int(port)
+        TCPParser = experiment.getParse()
         tcp=TCPParser(host=host, port=port,name=tcpname)
         ch_nums=experiment.device_channels
         print("tcp ",tcp)
@@ -310,7 +309,7 @@ def getdata():
     return success({"data":arr.tolist(),'ch_names':experiment.channels,'timeend':rend})
     
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0',port=10086, debug=True)
+    socketio.run(app, host='0.0.0.0',port=10086, debug=False)
     #http_serve=WSGIServer(("0.0.0.0",10086),app,handler_class=WebSocketHandler)
     #http_serve.serve_forever()
     

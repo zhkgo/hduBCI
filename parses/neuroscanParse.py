@@ -12,7 +12,7 @@ from flask_socketio import SocketIO, emit
 import scipy.io as scio
 
 # 兼容了两台不同的neuroscan
-# 兼容了32通道的neuroscan
+# 兼容了32通道的neuroscan 需要自己注意哪些是有效通道
 # 可以发送消息给计算机视觉模块
 class TCPParser(Thread):
     def __init__(self, name="neuroscan", host="127.0.0.1", port=4000, save_data=False, save_len=9000000):  # 可以通过初始化来传递参数
@@ -318,11 +318,11 @@ class TCPParser(Thread):
     #     print(f"第{self.save_fos}段数据保存完成！")
     #     self.save_fos += 1
 
-    def saveData(self, startfos):
+    def saveData(self, startfos=0):
         print(f"保存{self.name}的数据")
         ctime = time.strftime("%Y%m%d%H%M%S", time.localtime())
         savemat(self.save_path + self.name + ctime+'.mat',
-                {'dat': self.global_buffer[: self.end], 'event': self.global_events[: self.end], "startfos": startfos})
+                {'dat': self.global_buffer[: self.end], 'event': self.global_events[: self.end], 'startfos': startfos,'channels':self.channel_names})
         print(f"保存完成！")
 
     def run(self):

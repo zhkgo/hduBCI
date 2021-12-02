@@ -9,10 +9,11 @@ import matplotlib.pyplot as plt
 import threading
 import numpy as np
 import time
+from scipy.io import savemat
 
 class TCPParser:  # The script contains one main class which handles Streamer data packet parsing.
 
-    def __init__(self, host, port, name):
+    def __init__(self, host, port, name='neuracle'):
         self.host = host
         self.port = port
         self.data_log = b''
@@ -21,7 +22,9 @@ class TCPParser:  # The script contains one main class which handles Streamer da
         # print(testnum)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.host, self.port))
+        self.channel_names=['Fp1','Fp2','F3','F4','F7','F8','FC1','FC2','FC5','FC6','Cz','C3','C4','T7','T8','CP1','CP2','CP5','CP6','Pz','P3','P4','P7','P8','POz','PO3','PO4','PO5','PO6','Oz','O1','O2','ref'],#ref 参考电极
         self.end=0
+        self.savepath='./data/'
     def reinit(self):
         self.done = False
         # self.data_log = b''
@@ -34,12 +37,13 @@ class TCPParser:  # The script contains one main class which handles Streamer da
         #先停200ms确保当前正在接受的数据解析完毕
         time.sleep(0.2)
         self.sock.close()
-    def saveData(self):
-        ctime=time.strftime("%Y%m%d%H%M%S",time.localtime())
-        savepathlog="data/log"+ctime+".npy"
-        savepathvalue="data/value"+ctime+".npy"
-        #np.save(savepathlog,self.data_log)
-        np.save(savepathvalue,self.signals[:self.end])
+
+    def saveData(self, startfos=0):
+        print(f"保存{self.name}的数据")
+        ctime = time.strftime("%Y%m%d%H%M%S", time.localtime())
+        savemat(self.save_path + self.name + ctime+'.mat',
+                {'dat': self.signals[:,:self.end],'startfos': startfos,'channels':self.channel_names})
+        print(f"保存完成！")
         
     def create_batch(self, ch_names, sampleRate=1000):
         self.ch_names = ch_names
