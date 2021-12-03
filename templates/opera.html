@@ -355,7 +355,7 @@
 <script src="./js/plugins/chosen/chosen.jquery.js"></script>
 <!--<script src="./js/plugins/dropzone/dropzone.js"></script>-->
 <script src="./js/plugins/iCheck/icheck.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+<script src="./js/socket.io.js" ></script>
 
 <script>
     trials_per_session = 50
@@ -364,8 +364,8 @@
     sample = 1
     right_sample = 0
     function ws_conn(){
-        var socket = io();
-        socket.on('my_response', function(msg, cb) {
+        ws = io('/res');
+        ws.on('my_response', function(msg, cb) {
             console.log(msg)
             msg = JSON.parse(msg)
             if (msg.data.sessions != undefined) {
@@ -392,6 +392,7 @@
             if (cb)
                 cb();
         });
+        ws.emit("startexperiment");
     }
 </script>
 <script>

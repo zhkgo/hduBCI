@@ -18,9 +18,6 @@ from flask_socketio import SocketIO, emit
 import numpy as np
 from myresponse import success,fail
 import importlib
-#from  gevent.pywsgi import WSGIServer
-# from  geventwebsocket.websocket import WebSocket,WebSocketError
-#from  geventwebsocket.handler import WebSocketHandler
 import os
 import traceback
 from flask_cors import CORS
@@ -75,12 +72,12 @@ def background_task():
             continue
         if type(res) is str:
             print(res)
-            socketio.emit('my_response',success({"finish":1,"message":res}))
+            socketio.emit('my_response',success({"finish":1,"message":res}),namespace="/res")
             break
-        socketio.emit('my_response',success({"finish":0,"sessions":res[0],"trials":res[1]}))
+        socketio.emit('my_response',success({"finish":0,"sessions":res[0],"trials":res[1]}),namespace="/res")
     if experiment.fitSessions>0:
         res=experiment.trainThreadStep2()
-        socketio.emit('my_response',success({"finish":1,"message":res}))
+        socketio.emit('my_response',success({"finish":1,"message":res}),namespace="/res")
     while True:
         socketio.sleep(0.1)
         res=experiment.predictThread()
@@ -88,11 +85,11 @@ def background_task():
             continue
         if type(res) is str:
             print(res)
-            socketio.emit('my_response',success({"finish":1,"message":res}))
+            socketio.emit('my_response',success({"finish":1,"message":res}),namespace="/res")
             break
-        socketio.emit('my_response',success({"finish":0,"predict":res[0],"true":res[1]}))
+        socketio.emit('my_response',success({"finish":0,"predict":res[0],"true":res[1]}),namespace="/res")
 
-@socketio.event
+@socketio.on('startexperiment',namespace='/res')
 def connect():
     global experiment,_thread
     try:
@@ -103,8 +100,8 @@ def connect():
                 _thread = socketio.start_background_task(target=background_task)
     except Exception as e:
         traceback.print_exc()
-        emit('my_response',fail(str(e)))
-    emit('my_response', success())
+        emit('my_response',fail(str(e)),namespace="/res")
+    emit('my_response', success(),namespace="/res")
 
 #创建实验
 @app.route("/api/createExperiment")
@@ -160,7 +157,7 @@ def createTcp():
         port=request.args.get("port")
         tcpname=request.args.get("tcpname")
         if host==None:
-            host="10.1.25.96" # 测试用 正常改成localhost
+            host="10.1.125.122" # 测试用 正常改成localhost
         if port==None:
             port=4000
         if tcpname==None:

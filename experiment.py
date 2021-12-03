@@ -35,7 +35,7 @@ class Experiment:
         self.sigmas=None
 
         self.fitSessions=0
-        self.startTimes=[] #实验开始时间 对于不同TCP连接 开始的点可能不同 单位ms
+        self.startTimes=[0,0,0,0,0,0] #实验开始时间 对于不同TCP连接 开始的点可能不同 单位ms
         self.sessions=0 #session数量 
         self.trials=0  #每个session的trial数量
         self.duration=0 #一个trail持续时间 单位ms
