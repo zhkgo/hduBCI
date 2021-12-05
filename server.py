@@ -95,6 +95,7 @@ def connect():
     try:
         experiment.start()
         print("实验开始")
+        #此处可以添加socket端口，用于将结果发送到在其他终端的程序,建议设置全局变量，或者传输到background_task中
         with thread_lock:
             if _thread is None:
                 _thread = socketio.start_background_task(target=background_task)
