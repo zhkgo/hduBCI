@@ -408,10 +408,13 @@
     dom = null
     myChart = null
     function getdata() {
-        httpRequest(base_host + "api/getdata",{'timeend': -1},'get', function (dat) {
+        httpRequest(base_host + "api/getdata",{'timeend': timeend},'get', function (dat) {
             dat = JSON.parse(dat)
             var data = dat['data']
             timeend = data['timeend'];
+            if (timeend ==null){
+                timeend=-1
+               }
             newdata = data['data'];
             //console.log(typeof (indata[0][0]))#
             ch_names = data['ch_names'];
@@ -438,13 +441,13 @@
         var channels = selected.split(",");
         var valid_chans = ['FP1','FPZ','FP2','AF3','AF4','F7','F5','F3','F1','FZ','F2','F4','F6','F8','FT7','FC5','FC3','FC1','FCZ','FC2','FC4','FC6','FT8','T7','C5','C3','C1','CZ','C2','C4','C6','T8','M1','TP7','CP5','CP3','CP1','CPZ','CP2','CP4','CP6','TP8','M2','P7','P5','P3','P1','PZ','P2','P4','P6','P8','PO7','PO5','PO3','POZ','PO4','PO6','PO8','CB1','O1','OZ','O2','CB2']
         var right_chan = 'valid'
-        for (var i=0; i<channels.length; i++) {
-            if (valid_chans.indexOf(channels[i]) == -1) {
-                right_chan = channels[i]
-                layer.msg(right_chan + "通道不存在")
-                return false
-            }
-        }
+<!--        for (var i=0; i<channels.length; i++) {-->
+<!--            if (valid_chans.indexOf(channels[i]) == -1) {-->
+<!--                right_chan = channels[i]-->
+<!--                layer.msg(right_chan + "通道不存在")-->
+<!--                return false-->
+<!--            }-->
+<!--        }-->
 
         var down_samples = $(".selected-samples").val();
         if (!(/(^[1-9]\d*$)/.test(down_samples))) {
@@ -490,6 +493,7 @@
         var param5 = $(".param5").val()
         var param6 = $(".param6").val()
         var param7 = $(".param7").val()
+        var param8 = 2
         if (!(/(^[1-9]\d*$)/.test(param1))) {
             layer.msg("请输入正确的实验次数")
         } else if (!(/(^[1-9]\d*$)/.test(param2))) {
@@ -507,7 +511,7 @@
         } else {
             var code = 0
             httpRequest(base_host+"api/createExperiment",
-                {"sessions":param1, "trials": param2, "interval": param3, "duration": param6, "tmin": param4, "tmax": (parseInt(param4) + parseInt(param5)), "device":1, "fitsessions":param7},
+                {"sessions":param1, "trials": param2, "interval": param3, "duration": param6, "tmin": param4, "tmax": (parseInt(param4) + parseInt(param5)), "device":param8, "fitsessions":param7},
                 'GET', function () {code = 1}, false
             )
             if (code == 1) {
@@ -757,7 +761,7 @@ $(document).ready(function () {
         }, function(){
             ws_conn();
             var sum = 0;
-            loopId = setInterval(getdata, 25);
+            loopId = setInterval(getdata, 100);
             layer.closeAll('dialog');
         }, function(){
 

@@ -132,7 +132,7 @@ def createFilter():
         return fail("请先创建实验")
     low=1
     high=40
-    sampleRateFrom=1000
+    sampleRateFrom=300
     sampleRateTo=1000
     try:
         low=float(request.args.get('low'))
@@ -158,11 +158,11 @@ def createTcp():
         port=request.args.get("port")
         tcpname=request.args.get("tcpname")
         if host==None:
-            host="10.1.125.122" # 测试用 正常改成localhost
+            host="127.0.0.1" # 测试用 正常改成localhost
         if port==None:
-            port=4000
+            port=8844
         if tcpname==None:
-            tcpname="neuroscan"
+            tcpname="dsi"
         else:
             port=int(port)
         TCPParser = experiment.getParse()
@@ -296,7 +296,7 @@ def getdata():
     # print("TCP END WHEN GET DATA",experiment.tcp.end)
     try:
         timeend=int(request.args.get('timeend'))
-        arr,rend=experiment.getData(timeend)
+        arr,rend=experiment.getData(timeend,show=True)
         # print(arr.tolist())
     except Exception as e:
         traceback.print_exc()

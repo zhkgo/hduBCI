@@ -44,7 +44,7 @@ class Experiment:
         self.interval=0 #session之间的间隔
         self.tmin=0 #截取时间起点（相比于trail开始的时间点 单位ms）
         self.tmax=0 #截取时间终点（相比于trail开始的时间点 单位ms）
-        self.device=0  #device= 0 博瑞康 device=1 neuroscan 
+        self.device=0  #device= 0 博瑞康 device=1 neuroscan  device=2 dsi24
         self.device_channels=[]
         self.events=[]
         self.fitEvents=[]
