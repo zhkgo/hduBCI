@@ -32,7 +32,6 @@ class BciFilter:
         samps = int(secs * self.sampleRateTo)
         if samps > 0:
             data = resample(data, samps, axis=1)
-        # self.ch_names
         return data
 
     def norm(self, data):
@@ -43,25 +42,19 @@ class BciFilter:
         return data
 
     def dealforshow(self, data):
-        # print(data[:10])
         data = data[self.idxs]
-        # return data
         shape = data.shape[1]
-        # print(shape)
         if data.shape[1] < self.buffer.shape[1]:
             np.roll(self.buffer, -shape, axis=1)
             self.buffer[:, -shape:] = data
             data = self.buffer
-            # print("here")
         else:
             self.buffer=data[:,-self.buffer.shape[1]:]
-            # print("here2")
         data = signal.filtfilt(self.b, self.a, data)
         secs = data.shape[1] / self.sampleRate
         samps = int(secs * self.sampleRateTo)
         if samps > 0:
             data = resample(data, samps, axis=1)
         data = self.norm(data)[:, -shape:]
-        # print(data.shape)
         return data
 

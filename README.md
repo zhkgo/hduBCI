@@ -3,7 +3,7 @@ hduBCI for connect device、algorithm、application.
 
 杭州电子科技大学，515脑机协同智能实验室。
 
-目前支持接入neuroscan设备，博瑞康的设备只有一个初步版本，还在兼容中（被借走了）。
+目前支持接入neuroscan设备，博瑞康DSI-24以及拓展脑电帽。
 ## 准备进行
 
 - 前端代码的全部重构。现有的前端代码因为项目进程比较混乱。
