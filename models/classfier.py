@@ -32,6 +32,7 @@ class FlatFeature:
         if self.scaler is not None:
             return self.scaler.fit_transform(res)
         return res
+
 def getScaler():
     scaler=None
     with open("models/ff.scaler","rb") as f:

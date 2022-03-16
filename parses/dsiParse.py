@@ -148,7 +148,6 @@ class DSIDevice:
 
     def get_device_info(self):
         return self.channels,self.frequency
-
     def get_batch(self, startPos: int, maxlength=200):
         if startPos <= -1:
             startPos = self.end - maxlength
@@ -161,6 +160,7 @@ class DSIDevice:
     #         EEG_batch_data = self.EEG_data[self.counter:self.counter+self.batch_size]
     #         self.counter+=self.batch_size
     #     else:
+
     #         EEG_batch_data = self.EEG_data[self.counter:]
     #         self.counter = self.EEG_data.shape[0]
 
