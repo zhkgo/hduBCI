@@ -13,7 +13,7 @@ hduBCI for connect device、algorithm、application.
 
 ✅ 接受数据时判定返回是否异常，解析数据
 
-✅ ~server内常见异常处理
+✅ server内常见异常处理
 
 ✅ 实验前端页面接入
 
