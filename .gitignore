@@ -4,5 +4,5 @@
 */__pycache__/*
 tester.py
 *.pyc
- __pycache__/ 
+__pycache__/
  /models
