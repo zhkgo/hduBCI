@@ -99,7 +99,7 @@ class DSIDevice:
         eeg_data = []
         for i in range(0, len(ch_data), 4):
             # print(ch_data[i:i+4])
-            a = ch_data[i:i + 4]
+            a = ch_data[i:i + 4:-1]
             eeg_data.append(a)
         eeg_data = np.array(eeg_data)
         eeg_data.dtype = np.float32
